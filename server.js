@@ -6,7 +6,14 @@ const path = require('path');
 const https = require('https');
 const Groq = require('groq-sdk');
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const getGroqClient = () => {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        throw new Error('GROQ_API_KEY environment variable is not configured on Vercel.');
+    }
+    return new Groq({ apiKey });
+};
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -214,6 +221,7 @@ app.post('/api/generate-names', async (req, res) => {
     if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
 
     try {
+        const groq = getGroqClient();
         const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             temperature: 0.8,
@@ -253,7 +261,11 @@ app.post('/api/generate-names', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5173;
-app.listen(PORT, () => {
-    console.log(`Domain Checker Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    const PORT = process.env.PORT || 5173;
+    app.listen(PORT, () => {
+        console.log(`Domain Checker Server running at http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
