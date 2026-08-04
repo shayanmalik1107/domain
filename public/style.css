@@ -848,3 +848,92 @@ small {
 .toast-close:hover {
     color: var(--text-primary);
 }
+
+/* ─── AdSense Banners ────────────────────────────────────────── */
+.ad-container {
+    width: 100%;
+    margin: 1.5rem 0;
+    padding: 0.85rem;
+    background: var(--surface);
+    border: 1px dashed var(--border-light);
+    border-radius: 8px;
+    text-align: center;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+    transition: border-color 0.2s ease;
+}
+
+.ad-container:hover {
+    border-color: var(--border);
+}
+
+.ad-container.ad-top {
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.ad-container.ad-bottom {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.ad-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    display: block;
+    user-select: none;
+}
+
+.adsbygoogle {
+    width: 100%;
+    min-height: 50px;
+    max-width: 100%;
+}
+
+/* ─── AdSense Sidebars (Left & Right Skyscrapers) ───────────── */
+.ad-sidebar {
+    position: fixed;
+    top: 60px;
+    width: 160px;
+    height: 600px;
+    max-height: calc(100vh - 80px);
+    background: var(--surface);
+    border: 1px dashed var(--border-light);
+    border-radius: 8px;
+    padding: 0.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 10;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.ad-sidebar:hover {
+    border-color: var(--border);
+}
+
+.ad-sidebar.ad-left {
+    left: max(12px, calc(50vw - 430px - 180px));
+}
+
+.ad-sidebar.ad-right {
+    right: max(12px, calc(50vw - 430px - 180px));
+}
+
+/* Hide side skyscrapers on screens under 1240px wide to prevent any layout overlap */
+@media (max-width: 1240px) {
+    .ad-sidebar {
+        display: none !important;
+    }
+}
