@@ -327,8 +327,10 @@ if (aiGenerateBtn) {
                     body: JSON.stringify({ prompt })
                 });
 
-                if (!response.ok) throw new Error('Failed to generate names');
-                const data = await response.json();
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(data.error || `Failed to generate names (Status: ${response.status})`);
+                }
                 
                 if (!data.names || data.names.length === 0) {
                     showToast('AI could not generate names. Please refine your description.', 'warning');
@@ -360,8 +362,8 @@ if (aiGenerateBtn) {
             nameInput.value = names.join('\n');
             checkBtn.click();
         } catch (err) {
-            console.error(err);
-            showToast('Error generating names.', 'error');
+            console.error('AI Generation Error:', err);
+            showToast(err.message || 'Error generating names.', 'error');
         } finally {
             aiGenerateBtn.disabled = false;
             aiBtnText.textContent = 'Generate Names & Check';

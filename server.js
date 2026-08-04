@@ -7,7 +7,7 @@ const https = require('https');
 const Groq = require('groq-sdk');
 
 const getGroqClient = () => {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = (process.env.GROQ_API_KEY || '').trim();
     if (!apiKey) {
         throw new Error('GROQ_API_KEY environment variable is not configured on Vercel.');
     }
@@ -139,7 +139,7 @@ const lookupWithRetry = async (domain) => {
     }
 };
 
-app.post('/api/check', async (req, res) => {
+app.post(['/api/check', '/check'], async (req, res) => {
     const { names, tlds, domains: explicitDomains } = req.body;
 
     let allDomains = [];
@@ -216,7 +216,7 @@ app.post('/api/check', async (req, res) => {
     res.end();
 });
 
-app.post('/api/generate-names', async (req, res) => {
+app.post(['/api/generate-names', '/generate-names'], async (req, res) => {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
 
@@ -252,12 +252,16 @@ app.post('/api/generate-names', async (req, res) => {
         }
 
         // Sanitize names: lowercased, only a-z0-9 and hyphens
-        names = names.map(n => n.toString().toLowerCase().replace(/[^a-z0-9-]/g, '')).filter(Boolean);
+        if (Array.isArray(names)) {
+            names = names.map(n => n.toString().toLowerCase().replace(/[^a-z0-9-]/g, '')).filter(Boolean);
+        } else {
+            names = [];
+        }
 
         res.json({ names: names.slice(0, 20) });
     } catch (error) {
         console.error('Error generating names:', error);
-        res.status(500).json({ error: 'Failed to generate names' });
+        res.status(500).json({ error: error.message || 'Failed to generate names' });
     }
 });
 
