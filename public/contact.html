@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us — Nexus Domain Checker</title>
+    <meta name="description" content="Have questions or feedback? Contact the Nexus Domains support team.">
+    <link rel="canonical" href="https://nexusdomains.app/contact">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3026677123051137" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#2563eb"/><path d="M16 6L23.7942 21H8.20577L16 6Z" fill="white" opacity="0.9"/><circle cx="16" cy="18" r="3" fill="#2563eb"/></svg>
+                <span>Nexus<span class="highlight">Domains</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/#how-it-works">How It Works</a>
+                <a href="/#tlds">TLDs</a>
+                <a href="/#faq">FAQ</a>
+                <a href="/about">About</a>
+                <a href="/contact" class="active">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/" class="nav-btn-primary">Launch Tool</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Left Sidebar Ad -->
+    <aside class="ad-sidebar ad-left">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <div class="container page-content">
+        <header class="page-header">
+            <h1>Contact <span class="highlight">Support</span></h1>
+            <p>We'd love to hear from you! Send us your questions, feedback, or suggestions.</p>
+        </header>
+
+        <main class="legal-card">
+            <div class="grid-2col">
+                <div>
+                    <h2>Get in Touch</h2>
+                    <p style="margin-bottom:1.5rem;">Have a question about WHOIS lookups, TLD support, or API access? Fill out the form or email us directly.</p>
+                    
+                    <div class="info-box">
+                        <h3>📧 Direct Email</h3>
+                        <p><a href="mailto:support@nexusdomains.app" style="color:var(--accent);text-decoration:none;font-weight:600;">support@nexusdomains.app</a></p>
+                    </div>
+
+                    <div class="info-box" style="margin-top:1rem;">
+                        <h3>⏱️ Response Time</h3>
+                        <p>Our team typically responds within 24–48 hours on business days.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <form id="contact-form" class="contact-form">
+                        <div class="form-group">
+                            <label for="contact-name">Your Name</label>
+                            <input type="text" id="contact-name" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email Address</label>
+                            <input type="email" id="contact-email" required placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-subject">Subject</label>
+                            <input type="text" id="contact-subject" required placeholder="Question regarding WHOIS lookups">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-message">Message</label>
+                            <textarea id="contact-message" required rows="5" placeholder="How can we help you?"></textarea>
+                        </div>
+                        <button type="submit" class="action-btn">Send Message</button>
+                        <div id="contact-status" class="hidden" style="margin-top:1rem;padding:0.75rem;border-radius:6px;font-size:0.85rem;text-align:center;"></div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Right Sidebar Ad -->
+    <aside class="ad-sidebar ad-right">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Nexus<span class="highlight">Domains</span></h3>
+                <p>Bulk WHOIS Availability & AI Naming Engine.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/about">About Us</a>
+                <a href="/contact">Contact</a>
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/terms-of-service">Terms of Service</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Nexus Domains. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contact-form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const status = document.getElementById('contact-status');
+            status.textContent = 'Thank you! Your message has been sent successfully.';
+            status.style.background = 'var(--success-dim)';
+            status.style.color = 'var(--success)';
+            status.style.border = '1px solid var(--success-border)';
+            status.classList.remove('hidden');
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>

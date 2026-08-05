@@ -3,16 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Domain Checker — Bulk WHOIS Availability Tool</title>
-    <meta name="description" content="Check domain availability in bulk. AI-powered name generation plus real-time WHOIS lookup for .com, .ai, .co, .pk, .online, and more.">
+    <title>Nexus Domains — Bulk WHOIS Availability & AI Name Generator</title>
+    <meta name="description" content="Check domain availability in bulk with real-time WHOIS lookups for .com, .ai, .co, .pk, .online, and .agency. Generate brandable domain names with Llama 3.3 AI.">
+    <meta name="keywords" content="domain checker, bulk WHOIS, WHOIS lookup, AI domain generator, check .com availability, check .ai availability, check .pk domain, domain name search">
+    <meta name="author" content="Nexus Domains">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nexusdomains.app/">
+    <meta property="og:title" content="Nexus Domains — Bulk WHOIS Availability & AI Name Generator">
+    <meta property="og:description" content="Instant real-time WHOIS lookups and AI-powered domain name generation for startups and developers.">
+    <meta property="og:site_name" content="Nexus Domains">
+    <meta property="og:image" content="https://nexusdomains.app/og-image.png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://nexusdomains.app/">
+    <meta name="twitter:title" content="Nexus Domains — Bulk WHOIS Availability Tool">
+    <meta name="twitter:description" content="Check domain availability in bulk with real-time WHOIS queries and AI naming suggestions.">
+    <meta name="twitter:image" content="https://nexusdomains.app/og-image.png">
+
+    <!-- Canonical URL & Favicon -->
+    <link rel="canonical" href="https://nexusdomains.app/">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="nexus-domain-verification-code">
+
     <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3026677123051137"
-     crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="style.css?v=4">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3026677123051137" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="style.css?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Structured JSON-LD Metadata -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Nexus Domains",
+      "url": "https://nexusdomains.app",
+      "description": "Bulk WHOIS domain availability checker and AI-powered domain name generator.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 </head>
 <body>
+    <!-- Top Sticky Navigation Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#2563eb"/><path d="M16 6L23.7942 21H8.20577L16 6Z" fill="white" opacity="0.9"/><circle cx="16" cy="18" r="3" fill="#2563eb"/></svg>
+                <span>Nexus<span class="highlight">Domains</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="active">Home</a>
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#tlds">TLDs</a>
+                <a href="#faq">FAQ</a>
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button id="nav-history-btn" class="nav-btn-secondary">AI & Check History</button>
+                <button id="nav-login-btn" class="nav-btn-primary">Sign In</button>
+            </div>
+        </div>
+    </nav>
+
     <!-- History Drawer -->
     <div id="history-overlay" class="drawer-overlay hidden"></div>
     <div id="history-drawer" class="history-drawer closed">
@@ -27,13 +93,11 @@
         <div class="drawer-content">
             <div id="ai-tab" class="tab-panel active">
                 <div class="history-list" id="ai-history-list">
-                    <!-- AI history items injected here -->
                     <div class="empty-state">No AI history found.</div>
                 </div>
             </div>
             <div id="domains-tab" class="tab-panel">
                 <div class="history-list" id="domains-history-list">
-                    <!-- Domain history items injected here -->
                     <div class="empty-state">No domain checks found.</div>
                 </div>
             </div>
@@ -72,17 +136,11 @@
     <!-- Left Sidebar Ad -->
     <aside class="ad-sidebar ad-left">
         <span class="ad-label">ADVERTISEMENT</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-3026677123051137"
-             data-ad-slot="auto"
-             data-ad-format="vertical"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
+    <!-- App Container (Tool at Top) -->
     <div id="app-container" class="container">
         <header>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -102,8 +160,8 @@
         </header>
 
         <main>
+            <!-- Core Tool Panel (Top of Page) -->
             <div class="panel">
-
                 <!-- AI Generator -->
                 <div class="ai-section">
                     <div class="ai-section-header">
@@ -138,44 +196,32 @@
                     <div class="checkbox-group" id="tld-container">
                         <label class="tld-label">
                             <input type="checkbox" value=".com" checked>
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .com
                         </label>
                         <label class="tld-label">
                             <input type="checkbox" value=".ai">
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .ai
                         </label>
                         <label class="tld-label">
                             <input type="checkbox" value=".co">
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .co
                         </label>
                         <label class="tld-label">
                             <input type="checkbox" value=".pk">
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .pk
                         </label>
                         <label class="tld-label">
                             <input type="checkbox" value=".online">
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .online
                         </label>
                         <label class="tld-label">
                             <input type="checkbox" value=".agency">
-                            <span class="tld-check">
-                                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>
-                            </span>
+                            <span class="tld-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></span>
                             .agency
                         </label>
                     </div>
@@ -192,55 +238,222 @@
             <div id="results-panel" class="results-panel hidden">
                 <div class="results-header">
                     <h2>Results</h2>
-                    <div class="stats" id="stats-container">
-                        <!-- Stats injected here -->
-                    </div>
+                    <div class="stats" id="stats-container"></div>
                 </div>
                 <div class="table-container">
                     <table class="results-table" id="results-table">
-                        <thead>
-                            <tr id="results-table-header">
-                                <!-- Headers injected here -->
-                            </tr>
-                        </thead>
-                        <tbody id="results-table-body">
-                            <!-- Rows injected here -->
-                        </tbody>
+                        <thead><tr id="results-table-header"></tr></thead>
+                        <tbody id="results-table-body"></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- AdSense Bottom Banner -->
-            <div class="ad-container ad-bottom">
-                <span class="ad-label">ADVERTISEMENT</span>
-                <ins class="adsbygoogle"
-                     style="display:block"
-                     data-ad-client="ca-pub-3026677123051137"
-                     data-ad-slot="auto"
-                     data-ad-format="auto"
-                     data-full-width-responsive="true"></ins>
-                <script>
-                     (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
-            </div>
+            <!-- ─── Landing Page Sections Below Tool ────────────────────── -->
+
+            <!-- Features Section -->
+            <section id="features" class="landing-section">
+                <div class="section-title">
+                    <h2>Why Use <span class="highlight">Nexus Domains</span></h2>
+                    <p>Designed for founders, brand strategists, and developers who need fast, accurate, and confidential WHOIS lookups.</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI Naming Intelligence</h3>
+                        <p>Powered by Llama 3.3 70B to generate brandable, available domain name concepts tailored directly to your prompt.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Real-Time Live WHOIS</h3>
+                        <p>Direct WHOIS & RDAP queries to Verisign, PKNIC, and NIC.AI. Zero cached or stale data.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Privacy Guaranteed</h3>
+                        <p>We do not store or sell your search history. Your domain ideas remain completely private and safe from front-running.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📦</div>
+                        <h3>Bulk Multi-TLD Checks</h3>
+                        <p>Check up to 50 names across 6 extensions simultaneously in chunked streaming batches.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section id="how-it-works" class="landing-section">
+                <div class="section-title">
+                    <h2>How It <span class="highlight">Works</span></h2>
+                    <p>Get from idea to available domain name in 3 simple steps.</p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3>Enter Idea or Prompt</h3>
+                        <p>Type keywords or describe your business concept to generate AI-suggested domain names instantly.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3>Select Extensions</h3>
+                        <p>Choose from popular extensions including .com, .ai, .co, .pk, .online, and .agency.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h3>View Availability</h3>
+                        <p>Get live WHOIS verification status with instant registration retry options for any failed lookups.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Supported TLDs Section -->
+            <section id="tlds" class="landing-section">
+                <div class="section-title">
+                    <h2>Supported <span class="highlight">TLDs & Registries</span></h2>
+                    <p>Real-time registry WHOIS and RDAP integration across major top-level domains.</p>
+                </div>
+
+                <div class="tld-grid">
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.COM</div>
+                        <h4>Verisign GRS</h4>
+                        <p>The gold standard commercial extension with direct Verisign WHOIS lookup.</p>
+                    </div>
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.AI</div>
+                        <h4>Anguilla Registry</h4>
+                        <p>The premier domain for artificial intelligence companies and tech startups.</p>
+                    </div>
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.CO</div>
+                        <h4>Registry.co</h4>
+                        <p>Modern global extension widely adopted by innovative startups and brands.</p>
+                    </div>
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.PK</div>
+                        <h4>PKNIC Registry</h4>
+                        <p>Official country-code TLD for Pakistan with direct PKNIC status verification.</p>
+                    </div>
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.ONLINE</div>
+                        <h4>Radix Registry</h4>
+                        <p>Versatile extension ideal for digital creators, stores, and personal brands.</p>
+                    </div>
+                    <div class="tld-info-card">
+                        <div class="tld-badge">.AGENCY</div>
+                        <h4>Identity Digital (RDAP)</h4>
+                        <p>Professional extension for agencies, consultancies, and creative studios.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="landing-section">
+                <div class="section-title">
+                    <h2>Frequently Asked <span class="highlight">Questions</span></h2>
+                    <p>Everything you need to know about domain availability and WHOIS lookups.</p>
+                </div>
+
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>How accurate are the WHOIS domain checks?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Our checks query primary registry WHOIS and RDAP servers in real-time (such as Verisign for .com and PKNIC for .pk). Because we query official registry servers directly rather than relying on cached databases, accuracy is practically 100% at the moment of lookup.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Do you store or log my domain searches?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>No. We respect your search confidentiality. We never save, log, or resell domain names you enter or AI prompts you generate. Your search ideas remain 100% private to you.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>How does the AI Domain Generator work?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Our AI generator uses Llama 3.3 70B trained on brand naming patterns. When you enter a prompt describing your project, the AI generates 10 to 20 creative, brandable root names, which are then automatically checked against your selected TLD extensions.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Can I register domains directly through Nexus Domains?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Nexus Domains is an independent WHOIS availability checker. Once you find an available domain, you can register it through any accredited domain registrar of your choice (e.g. Namecheap, GoDaddy, Porkbun, or Cloudflare).</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span>Is Nexus Domains free to use?</span>
+                            <span class="faq-icon">+</span>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Yes! Nexus Domains is 100% free for bulk domain lookups and AI generation. We support the site through unobtrusive advertising.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
     <!-- Right Sidebar Ad -->
     <aside class="ad-sidebar ad-right">
         <span class="ad-label">ADVERTISEMENT</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-3026677123051137"
-             data-ad-slot="auto"
-             data-ad-format="vertical"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </aside>
 
-    <script type="module" src="app.js?v=4"></script>
+    <!-- Cookie Consent Banner Toast -->
+    <div id="cookie-banner" class="cookie-banner hidden">
+        <div class="cookie-content">
+            <p>We use essential cookies and AdSense analytics to ensure you get the best experience on our website. Read our <a href="/privacy-policy">Privacy Policy</a>.</p>
+            <div class="cookie-buttons">
+                <button id="cookie-decline-btn" class="cookie-btn-secondary">Decline</button>
+                <button id="cookie-accept-btn" class="cookie-btn-primary">Accept All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <h3>Nexus<span class="highlight">Domains</span></h3>
+                <p>Bulk WHOIS Availability & AI Naming Engine.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/about">About Us</a>
+                <a href="/contact">Contact</a>
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/terms-of-service">Terms of Service</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Nexus Domains. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="app.js?v=5"></script>
     <script>
         // Live counter for selected extensions
         const tldContainer = document.getElementById('tld-container');
@@ -250,6 +463,14 @@
             tldCountLabel.textContent = count === 1 ? '1 selected' : `${count} selected`;
         }
         tldContainer.addEventListener('change', updateTldCount);
+
+        // Header navbar sync for history and login buttons
+        document.getElementById('nav-history-btn')?.addEventListener('click', () => {
+            document.getElementById('history-btn')?.click();
+        });
+        document.getElementById('nav-login-btn')?.addEventListener('click', () => {
+            document.getElementById('login-btn')?.click();
+        });
     </script>
 </body>
 </html>

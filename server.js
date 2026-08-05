@@ -265,8 +265,20 @@ app.post(['/api/generate-names', '/generate-names'], async (req, res) => {
     }
 });
 
+// ─── Static Page Routes ───────────────────────────────────────────────
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
+app.get('/contact', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
+app.get('/privacy-policy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html')));
+app.get('/terms-of-service', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html')));
+
+// ─── 404 Fallback Handler ─────────────────────────────────────────────
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
 if (require.main === module) {
-    const PORT = process.env.PORT || 5173;
+    const PORT = process.env.PORT || 5050;
     app.listen(PORT, () => {
         console.log(`Domain Checker Server running at http://localhost:${PORT}`);
     });
