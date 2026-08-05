@@ -971,18 +971,18 @@ small {
 }
 
 .nav-logo-img {
-    height: 30px;
+    height: 50px;
     width: auto;
-    max-height: 32px;
+    max-height: 55px;
     object-fit: contain;
 }
 
 .footer-logo-img {
-    height: 38px;
+    height: 65px;
     width: auto;
-    max-height: 42px;
+    max-height: 75px;
     object-fit: contain;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     display: block;
     margin-left: auto;
     margin-right: auto;
