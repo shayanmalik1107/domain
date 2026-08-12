@@ -28,7 +28,7 @@
     <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- Google Site Verification -->
-    <meta name="google-site-verification" content="nexus-domain-verification-code">
+    <meta name="google-site-verification" content="db4991bbb4706989">
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3026677123051137" crossorigin="anonymous"></script>
@@ -68,6 +68,7 @@
                 <a href="#how-it-works">How It Works</a>
                 <a href="#tlds">TLDs</a>
                 <a href="#faq">FAQ</a>
+                <a href="/blog.html">Blog</a>
                 <a href="/about">About</a>
                 <a href="/contact">Contact</a>
             </div>
@@ -236,7 +237,14 @@
             <!-- Results -->
             <div id="results-panel" class="results-panel hidden">
                 <div class="results-header">
-                    <h2>Results</h2>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <h2>Results</h2>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <span><strong style="color: var(--success);">Avb:</strong> Available</span>
+                            <span><strong style="color: var(--error);">Taken:</strong> Registered</span>
+                            <span><strong style="color: var(--warning);">Error:</strong> Lookup failed (Click Retry)</span>
+                        </div>
+                    </div>
                     <div class="stats" id="stats-container"></div>
                 </div>
                 <div class="table-container">
@@ -352,6 +360,32 @@
                 </div>
             </section>
 
+            <!-- Domain Selection Tips Section -->
+            <section id="tips" class="landing-section">
+                <div class="section-title">
+                    <h2>Tips for Choosing a <span class="highlight">Great Domain</span></h2>
+                    <p>Best practices to keep in mind when selecting a name for your next big project.</p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number" style="background:var(--accent);">💡</div>
+                        <h3>Keep It Short & Simple</h3>
+                        <p>Shorter names are easier to remember, type, and share. Aim for 2-3 words maximum.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number" style="background:var(--accent);">🚫</div>
+                        <h3>Avoid Hyphens & Numbers</h3>
+                        <p>Hyphens can lead to confusion and lost traffic. Stick to alphabetical characters.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number" style="background:var(--accent);">🎯</div>
+                        <h3>Pick the Right Extension</h3>
+                        <p>.com is the gold standard, but modern alternatives like .ai (for tech) or .co (for startups) are highly recognizable.</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- FAQ Section -->
             <section id="faq" class="landing-section">
                 <div class="section-title">
@@ -441,6 +475,7 @@
             </div>
             <div class="footer-links">
                 <a href="/">Home</a>
+                <a href="/blog.html">Blog</a>
                 <a href="/about">About Us</a>
                 <a href="/contact">Contact</a>
                 <a href="/privacy-policy">Privacy Policy</a>
