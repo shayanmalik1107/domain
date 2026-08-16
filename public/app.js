@@ -699,16 +699,16 @@ const cookieAcceptBtn = document.getElementById('cookie-accept-btn');
 const cookieDeclineBtn = document.getElementById('cookie-decline-btn');
 
 if (cookieBanner) {
-    const consent = localStorage.getItem('nexus_cookie_consent');
+    const consent = localStorage.getItem('domny_cookie_consent');
     if (!consent) {
         cookieBanner.classList.remove('hidden');
     }
     cookieAcceptBtn?.addEventListener('click', () => {
-        localStorage.setItem('nexus_cookie_consent', 'accepted');
+        localStorage.setItem('domny_cookie_consent', 'accepted');
         cookieBanner.classList.add('hidden');
     });
     cookieDeclineBtn?.addEventListener('click', () => {
-        localStorage.setItem('nexus_cookie_consent', 'declined');
+        localStorage.setItem('domny_cookie_consent', 'declined');
         cookieBanner.classList.add('hidden');
     });
 }

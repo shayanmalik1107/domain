@@ -1,7 +1,7 @@
 {
-  "name": "domain-checker",
+  "name": "domny",
   "version": "1.0.0",
-  "description": "Bulk Domain Availability Checker",
+  "description": "Domny Bulk Domain Availability Checker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
