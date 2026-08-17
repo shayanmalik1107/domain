@@ -266,11 +266,16 @@ app.post(['/api/generate-names', '/generate-names'], async (req, res) => {
 });
 
 // ─── Static Page Routes ───────────────────────────────────────────────
-app.get('/about', (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
-app.get('/contact', (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
-app.get('/privacy-policy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html')));
-app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html')));
-app.get('/terms-of-service', (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html')));
+app.get(['/about', '/about.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
+app.get(['/contact', '/contact.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
+app.get(['/privacy-policy', '/privacy-policy.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html')));
+app.get(['/terms', '/terms-of-service', '/terms-of-service.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html')));
+app.get(['/blog', '/blog.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog.html')));
+app.get(['/blog-1', '/blog-1.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-1.html')));
+app.get(['/blog-2', '/blog-2.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-2.html')));
+app.get(['/blog-3', '/blog-3.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-3.html')));
+app.get(['/blog-4', '/blog-4.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-4.html')));
+app.get(['/blog-5', '/blog-5.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-5.html')));
 
 // ─── 404 Fallback Handler ─────────────────────────────────────────────
 app.use((req, res) => {

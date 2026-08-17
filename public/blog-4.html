@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding WHOIS vs RDAP Protocols — Domny</title>
+    <meta name="description" content="Learn how WHOIS and RDAP protocols work under the hood to deliver real-time domain availability data.">
+    <link rel="canonical" href="https://domny.app/blog-4.html">
+    <link rel="icon" type="image/png" href="favi.png">
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3026677123051137" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <img src="mainlogo.png" alt="Logo" class="nav-logo-img">
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/blog.html">Blog</a>
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/" class="nav-btn-primary">Launch Tool</a>
+            </div>
+        </div>
+    </nav>
+
+    <aside class="ad-sidebar ad-left">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <div class="container page-content">
+        <header class="page-header" style="text-align: left;">
+            <p><a href="/blog.html" style="color: var(--accent); text-decoration: none;">&larr; Back to Blog</a></p>
+            <h1 style="margin-top: 1rem;">Understanding WHOIS vs RDAP Protocols</h1>
+            <p style="color: var(--text-secondary);">August 14, 2026 • 5 min read</p>
+        </header>
+
+        <main class="legal-card content-block">
+            <p>Every time you search for domain name availability, an automated query is sent across the internet to verify whether that domain is registered or available. For decades, the legacy WHOIS protocol has powered this infrastructure. Today, a newer standard called RDAP (Registration Data Access Protocol) is modernizing domain lookups.</p>
+            
+            <h2>1. What is the Legacy WHOIS Protocol?</h2>
+            <p>Created in 1982, the WHOIS protocol operates over TCP port 43. When a lookup query is submitted, a WHOIS client establishes a plain-text socket connection directly to official top-level domain registries (such as Verisign for .com or PKNIC for .pk). The registry responds with human-readable text detailing domain ownership status, registration dates, and nameservers.</p>
+            
+            <h2>2. What is RDAP (Registration Data Access Protocol)?</h2>
+            <p>RDAP was developed by ICANN and the IETF to succeed legacy WHOIS. Unlike WHOIS, RDAP utilizes standard HTTPS requests and returns machine-readable JSON payloads. This delivers enhanced data security, structured query formats, and standardized internationalization support.</p>
+            
+            <h2>3. Key Differences Between WHOIS & RDAP</h2>
+            <ul>
+                <li><strong>Data Format:</strong> WHOIS returns unstructured plain text, while RDAP returns structured JSON.</li>
+                <li><strong>Security & Privacy:</strong> RDAP runs strictly over encrypted HTTPS with built-in access control for privacy regulations like GDPR.</li>
+                <li><strong>Standardization:</strong> RDAP uses consistent HTTP status codes (such as HTTP 404 for available domains and HTTP 200 for registered domains).</li>
+            </ul>
+
+            <h2>4. How Domny Combines Both Protocols for Maximum Speed</h2>
+            <p>At Domny, our engine dynamically queries primary WHOIS servers for high-volume TLDs like .com and .pk while leveraging HTTPS RDAP endpoints for specialized extensions like .agency. This hybrid architecture ensures real-time accuracy and zero cached delays.</p>
+        </main>
+    </div>
+
+    <aside class="ad-sidebar ad-right">
+        <span class="ad-label">ADVERTISEMENT</span>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3026677123051137" data-ad-slot="auto" data-ad-format="vertical" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </aside>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <img src="mainlogo.png" alt="Logo" class="footer-logo-img">
+                <p>Bulk WHOIS Availability & AI Naming Engine.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/">Home</a>
+                <a href="/blog.html">Blog</a>
+                <a href="/about">About Us</a>
+                <a href="/contact">Contact</a>
+                <a href="/privacy-policy">Privacy Policy</a>
+                <a href="/terms-of-service">Terms of Service</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Domny. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
