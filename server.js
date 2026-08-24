@@ -276,6 +276,16 @@ app.get(['/blog-2', '/blog-2.html'], (req, res) => res.sendFile(path.join(__dirn
 app.get(['/blog-3', '/blog-3.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-3.html')));
 app.get(['/blog-4', '/blog-4.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-4.html')));
 app.get(['/blog-5', '/blog-5.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-5.html')));
+app.get(['/blog-6', '/blog-6.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-6.html')));
+app.get(['/blog-7', '/blog-7.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-7.html')));
+app.get(['/blog-8', '/blog-8.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-8.html')));
+app.get(['/blog-9', '/blog-9.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-9.html')));
+app.get(['/blog-10', '/blog-10.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-10.html')));
+app.get(['/blog-11', '/blog-11.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-11.html')));
+app.get(['/blog-12', '/blog-12.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-12.html')));
+app.get(['/blog-13', '/blog-13.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-13.html')));
+app.get(['/blog-14', '/blog-14.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-14.html')));
+app.get(['/blog-15', '/blog-15.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-15.html')));
 
 // ─── 404 Fallback Handler ─────────────────────────────────────────────
 app.use((req, res) => {

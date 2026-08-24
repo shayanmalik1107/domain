@@ -964,43 +964,9 @@ small {
 }
 
 /* ─── AdSense Sidebars (Left & Right Skyscrapers) ───────────── */
-.ad-sidebar {
-    position: fixed;
-    top: 135px;
-    width: 160px;
-    height: 600px;
-    max-height: calc(100vh - 155px);
-    background: var(--surface);
-    border: 1px dashed var(--border-light);
-    border-radius: 8px;
-    padding: 0.5rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    z-index: 10;
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-}
-
-.ad-sidebar:hover {
-    border-color: var(--border);
-}
-
-.ad-sidebar.ad-left {
-    left: max(12px, calc(50vw - 430px - 180px));
-}
-
-.ad-sidebar.ad-right {
-    right: max(12px, calc(50vw - 430px - 180px));
-}
-
-/* Hide side skyscrapers on screens under 1240px wide to prevent any layout overlap */
-@media (max-width: 1240px) {
-    .ad-sidebar {
-        display: none !important;
-    }
+.ad-sidebar,
+.ad-container {
+    display: none !important;
 }
 
 /* ─── Sticky Navbar ──────────────────────────────────────────── */
