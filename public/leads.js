@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const loginError = document.getElementById('login-error');
-    
+
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
     const tableWrapper = document.getElementById('table-wrapper');
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Success! Transition to dashboard
             loginContainer.style.display = 'none';
             dashboardContainer.style.display = 'flex';
-            
+
             renderTable(data.data);
             leadCount.textContent = `(${data.count.toLocaleString()} records)`;
 
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         domHtml += '</tr></thead><tbody id="contentArea" class="clusterize-content">';
         domHtml += '</tbody></table></div>';
-        
+
         tableWrapper.innerHTML = domHtml;
 
         // Build array of string rows for the virtual list
@@ -127,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function escapeHtml(unsafe) {
         if (typeof unsafe !== 'string') unsafe = String(unsafe);
         return unsafe
-             .replace(/&/g, "&amp;")
-             .replace(/</g, "&lt;")
-             .replace(/>/g, "&gt;")
-             .replace(/"/g, "&quot;")
-             .replace(/'/g, "&#039;");
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 });
