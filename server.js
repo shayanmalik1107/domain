@@ -5,8 +5,7 @@ const whois = require('whois');
 const path = require('path');
 const https = require('https');
 const Groq = require('groq-sdk');
-const { db } = require('./firebase');
-const { ref, set, get } = require('firebase/database');
+// Removed problematic firebase client SDK, using REST instead.
 
 const getGroqClient = () => {
     const apiKey = (process.env.GROQ_API_KEY || '').trim();
@@ -354,17 +353,27 @@ app.get('/api/zoho/callback', async (req, res) => {
                                     const accountId = account.accountId;
 
                                     const sanitizedEmail = emailAddress.replace(/\./g, ',');
-                                    const tokenRef = ref(db, 'zohoTokens/' + sanitizedEmail);
+                                    const firebaseRestUrl = `https://domny-b8498-default-rtdb.firebaseio.com/zohoTokens/${sanitizedEmail}.json`;
                                     
-                                    const snapshot = await get(tokenRef);
+                                    // Fetch existing to preserve refresh token
                                     let existingRefreshToken = null;
-                                    if (snapshot.exists()) {
-                                        existingRefreshToken = snapshot.val().refreshToken;
+                                    try {
+                                        const getResponse = await new Promise((resolve) => {
+                                            https.get(firebaseRestUrl, (res) => {
+                                                let data = '';
+                                                res.on('data', c => data += c);
+                                                res.on('end', () => resolve(JSON.parse(data)));
+                                            });
+                                        });
+                                        if (getResponse && getResponse.refreshToken) {
+                                            existingRefreshToken = getResponse.refreshToken;
+                                        }
+                                    } catch (fetchErr) {
+                                        console.log('No existing token or error fetching:', fetchErr);
                                     }
 
                                     const expiresAt = Date.now() + (expires_in * 1000);
-                                    
-                                    await set(tokenRef, {
+                                    const payload = JSON.stringify({
                                         emailAddress,
                                         accountId,
                                         accessToken: access_token,
@@ -372,12 +381,34 @@ app.get('/api/zoho/callback', async (req, res) => {
                                         apiDomain: api_domain,
                                         expiresAt
                                     });
-                                    console.log(`Saved tokens for ${emailAddress} to Firebase Database.`);
+
+                                    // Save to Firebase using REST
+                                    await new Promise((resolve, reject) => {
+                                        const req = https.request({
+                                            hostname: 'domny-b8498-default-rtdb.firebaseio.com',
+                                            port: 443,
+                                            path: `/zohoTokens/${sanitizedEmail}.json`,
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Content-Length': Buffer.byteLength(payload)
+                                            }
+                                        }, (res) => {
+                                            res.on('data', () => {});
+                                            res.on('end', resolve);
+                                        });
+                                        req.on('error', reject);
+                                        req.write(payload);
+                                        req.end();
+                                    });
+
+                                    console.log(`Saved tokens for ${emailAddress} to Firebase Database via REST.`);
                                 }
                                 return res.status(200).send('Zoho authorization successful. Tokens securely saved to Firebase.');
                             } catch (e) {
-                                console.error('Error parsing account data:', e);
-                                return res.status(500).send('Error retrieving account info.');
+                                console.error('Error parsing account data or saving to Firebase:', e);
+                                // Sending e.message directly to the browser so we can debug if it happens again!
+                                return res.status(500).send(`Error retrieving account info or saving to DB: ${e.message}`);
                             }
                         });
                     });
@@ -419,13 +450,21 @@ app.post('/api/zoho/send-email', async (req, res) => {
 
     try {
         const sanitizedEmail = fromEmail.replace(/\./g, ',');
-        const tokenRef = ref(db, 'zohoTokens/' + sanitizedEmail);
-        const snapshot = await get(tokenRef);
+        const firebaseRestUrl = `https://domny-b8498-default-rtdb.firebaseio.com/zohoTokens/${sanitizedEmail}.json`;
+
+        let tokenDoc = await new Promise((resolve) => {
+            https.get(firebaseRestUrl, (res) => {
+                let data = '';
+                res.on('data', c => data += c);
+                res.on('end', () => {
+                    try { resolve(JSON.parse(data)); } catch (e) { resolve(null); }
+                });
+            }).on('error', () => resolve(null));
+        });
         
-        if (!snapshot.exists()) {
+        if (!tokenDoc) {
             return res.status(404).json({ error: `No tokens found for ${fromEmail}. Please authorize this mailbox first.` });
         }
-        let tokenDoc = snapshot.val();
 
         // Check if access token is expired (add 1 min buffer)
         if (Date.now() > (tokenDoc.expiresAt - 60000)) {
@@ -466,7 +505,27 @@ app.post('/api/zoho/send-email', async (req, res) => {
 
             tokenDoc.accessToken = refreshedData.access_token;
             tokenDoc.expiresAt = Date.now() + (refreshedData.expires_in * 1000);
-            await set(tokenRef, tokenDoc);
+            
+            // Save refreshed token to Firebase REST
+            await new Promise((resolve, reject) => {
+                const payload = JSON.stringify(tokenDoc);
+                const req = https.request({
+                    hostname: 'domny-b8498-default-rtdb.firebaseio.com',
+                    port: 443,
+                    path: `/zohoTokens/${sanitizedEmail}.json`,
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': Buffer.byteLength(payload)
+                    }
+                }, (res) => {
+                    res.on('data', () => {});
+                    res.on('end', resolve);
+                });
+                req.on('error', reject);
+                req.write(payload);
+                req.end();
+            });
         }
 
         // Send Email using Zoho Mail API
