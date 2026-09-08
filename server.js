@@ -4,18 +4,9 @@ const cors = require('cors');
 const whois = require('whois');
 const path = require('path');
 const https = require('https');
-const mongoose = require('mongoose');
 const Groq = require('groq-sdk');
-const ZohoToken = require('./models/ZohoToken');
-
-// Connect to MongoDB
-if (process.env.MONGODB_URI) {
-    mongoose.connect(process.env.MONGODB_URI)
-        .then(() => console.log('Connected to MongoDB'))
-        .catch(err => console.error('MongoDB connection error:', err));
-} else {
-    console.warn('MONGODB_URI environment variable is missing. Tokens will not be saved.');
-}
+const { db } = require('./firebase');
+const { ref, set, get } = require('firebase/database');
 
 const getGroqClient = () => {
     const apiKey = (process.env.GROQ_API_KEY || '').trim();
@@ -362,27 +353,28 @@ app.get('/api/zoho/callback', async (req, res) => {
                                     const emailAddress = account.primaryEmailAddress;
                                     const accountId = account.accountId;
 
-                                    if (process.env.MONGODB_URI) {
-                                        const expiresAt = new Date(Date.now() + (expires_in * 1000));
-                                        
-                                        // Update or Create the token in DB
-                                        await ZohoToken.findOneAndUpdate(
-                                            { emailAddress },
-                                            {
-                                                emailAddress,
-                                                accountId,
-                                                accessToken: access_token,
-                                                // Only overwrite refresh_token if a new one is provided
-                                                ...(refresh_token && { refreshToken: refresh_token }),
-                                                apiDomain: api_domain,
-                                                expiresAt
-                                            },
-                                            { upsert: true, new: true }
-                                        );
-                                        console.log(`Saved tokens for ${emailAddress} to Database.`);
+                                    const sanitizedEmail = emailAddress.replace(/\./g, ',');
+                                    const tokenRef = ref(db, 'zohoTokens/' + sanitizedEmail);
+                                    
+                                    const snapshot = await get(tokenRef);
+                                    let existingRefreshToken = null;
+                                    if (snapshot.exists()) {
+                                        existingRefreshToken = snapshot.val().refreshToken;
                                     }
+
+                                    const expiresAt = Date.now() + (expires_in * 1000);
+                                    
+                                    await set(tokenRef, {
+                                        emailAddress,
+                                        accountId,
+                                        accessToken: access_token,
+                                        refreshToken: refresh_token || existingRefreshToken,
+                                        apiDomain: api_domain,
+                                        expiresAt
+                                    });
+                                    console.log(`Saved tokens for ${emailAddress} to Firebase Database.`);
                                 }
-                                return res.status(200).send('Zoho authorization successful. Tokens securely saved.');
+                                return res.status(200).send('Zoho authorization successful. Tokens securely saved to Firebase.');
                             } catch (e) {
                                 console.error('Error parsing account data:', e);
                                 return res.status(500).send('Error retrieving account info.');
@@ -426,13 +418,17 @@ app.post('/api/zoho/send-email', async (req, res) => {
     }
 
     try {
-        let tokenDoc = await ZohoToken.findOne({ emailAddress: fromEmail });
-        if (!tokenDoc) {
+        const sanitizedEmail = fromEmail.replace(/\./g, ',');
+        const tokenRef = ref(db, 'zohoTokens/' + sanitizedEmail);
+        const snapshot = await get(tokenRef);
+        
+        if (!snapshot.exists()) {
             return res.status(404).json({ error: `No tokens found for ${fromEmail}. Please authorize this mailbox first.` });
         }
+        let tokenDoc = snapshot.val();
 
         // Check if access token is expired (add 1 min buffer)
-        if (Date.now() > (tokenDoc.expiresAt.getTime() - 60000)) {
+        if (Date.now() > (tokenDoc.expiresAt - 60000)) {
             console.log(`Refreshing token for ${fromEmail}...`);
             const postData = new URLSearchParams({
                 client_id: process.env.ZOHO_CLIENT_ID,
@@ -441,9 +437,6 @@ app.post('/api/zoho/send-email', async (req, res) => {
                 refresh_token: tokenDoc.refreshToken
             }).toString();
 
-            const tokenUrlObj = new URL(`${tokenDoc.apiDomain}/oauth/v2/token`);
-            // Usually refresh is done at accounts.zoho.com, not mail.zoho.com
-            // We use the same accountsServer approach, but if we don't have it saved, fallback to accounts.zoho.com
             const tokenBaseUrl = 'https://accounts.zoho.com';
             const refreshUrlObj = new URL(`${tokenBaseUrl}/oauth/v2/token`);
 
@@ -472,8 +465,8 @@ app.post('/api/zoho/send-email', async (req, res) => {
             }
 
             tokenDoc.accessToken = refreshedData.access_token;
-            tokenDoc.expiresAt = new Date(Date.now() + (refreshedData.expires_in * 1000));
-            await tokenDoc.save();
+            tokenDoc.expiresAt = Date.now() + (refreshedData.expires_in * 1000);
+            await set(tokenRef, tokenDoc);
         }
 
         // Send Email using Zoho Mail API
