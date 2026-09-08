@@ -87,40 +87,41 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Limit to 200 rows for performance (Pagination can be added later)
-        const displayData = data.slice(0, 500);
-
         const headersSet = new Set();
-        displayData.forEach(row => {
+        data.forEach(row => {
             Object.keys(row).forEach(key => headersSet.add(key));
         });
         const headers = Array.from(headersSet);
 
-        let html = '<table><thead><tr>';
-        html += '<th class="row-num">#</th>';
+        // Setup DOM for Clusterize
+        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="height: 100%; width: 100%; overflow: auto;"><table><thead><tr>';
+        domHtml += '<th class="row-num">#</th>';
 
         headers.forEach(header => {
-            html += `<th>${escapeHtml(String(header))}</th>`;
+            domHtml += `<th>${escapeHtml(String(header))}</th>`;
         });
-        html += '</tr></thead><tbody>';
+        domHtml += '</tr></thead><tbody id="contentArea" class="clusterize-content">';
+        domHtml += '</tbody></table></div>';
+        
+        tableWrapper.innerHTML = domHtml;
 
-        displayData.forEach((row, index) => {
-            html += `<tr>`;
-            html += `<td class="row-num">${index + 1}</td>`;
+        // Build array of string rows for the virtual list
+        const rowsArray = data.map((row, index) => {
+            let trHtml = `<tr><td class="row-num">${index + 1}</td>`;
             headers.forEach(header => {
                 const cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
-                html += `<td>${escapeHtml(String(cellValue))}</td>`;
+                trHtml += `<td>${escapeHtml(String(cellValue))}</td>`;
             });
-            html += `</tr>`;
+            trHtml += `</tr>`;
+            return trHtml;
         });
 
-        html += '</tbody></table>';
-        
-        if (data.length > 500) {
-            html += `<div style="padding: 15px; text-align: center; color: #666; font-weight: bold; background: #fff;">Showing first 500 of ${data.length} records to ensure maximum browser performance.</div>`;
-        }
-
-        tableWrapper.innerHTML = html;
+        // Initialize Virtual Scrolling
+        new Clusterize({
+            rows: rowsArray,
+            scrollId: 'scrollArea',
+            contentId: 'contentArea'
+        });
     }
 
     function escapeHtml(unsafe) {
