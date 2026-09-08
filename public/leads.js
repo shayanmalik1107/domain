@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = Array.from(headersSet);
 
         // Setup DOM for Clusterize
-        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="height: 100%; width: 100%; overflow: auto;"><table><thead><tr>';
+        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="flex: 1; width: 100%; overflow: auto;"><table><thead><tr>';
         domHtml += '<th class="row-num">#</th>';
 
         headers.forEach(header => {

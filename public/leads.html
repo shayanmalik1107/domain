@@ -108,11 +108,13 @@
         /* Excel-like Table Styles */
         .table-wrapper {
             flex: 1;
-            overflow: auto;
+            overflow: hidden; /* Prevent wrapper from scrolling, let inner scrollArea handle it */
             background: #fff;
             width: 100%;
             max-width: 100vw;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
         table {
             border-collapse: collapse;
