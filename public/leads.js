@@ -87,43 +87,44 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Extract headers from the first object keys (assuming uniform data)
-        // Set collects all unique keys across all objects just in case
+        // Limit to 200 rows for performance (Pagination can be added later)
+        const displayData = data.slice(0, 500);
+
         const headersSet = new Set();
-        data.forEach(row => {
+        displayData.forEach(row => {
             Object.keys(row).forEach(key => headersSet.add(key));
         });
         const headers = Array.from(headersSet);
 
-        // Build Table HTML dynamically
-        let html = '<table><thead><tr>';
-        
-        // Corner cell
-        html += '<th class="row-num">#</th>';
+        let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr>';
+        html += '<th class="row-num" style="border: 1px solid #ccc; padding: 8px;">#</th>';
 
-        // Column Headers
         headers.forEach(header => {
-            html += `<th>${escapeHtml(header)}</th>`;
+            html += `<th style="border: 1px solid #ccc; padding: 8px; background: #eee;">${escapeHtml(String(header))}</th>`;
         });
         html += '</tr></thead><tbody>';
 
-        // Rows
-        data.forEach((row, index) => {
+        displayData.forEach((row, index) => {
             html += `<tr>`;
-            html += `<td class="row-num">${index + 1}</td>`;
+            html += `<td class="row-num" style="border: 1px solid #ccc; padding: 8px;">${index + 1}</td>`;
             headers.forEach(header => {
                 const cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
-                html += `<td>${escapeHtml(String(cellValue))}</td>`;
+                html += `<td style="border: 1px solid #ccc; padding: 8px; color: #111;">${escapeHtml(String(cellValue))}</td>`;
             });
             html += `</tr>`;
         });
 
         html += '</tbody></table>';
+        
+        if (data.length > 500) {
+            html += `<div style="padding: 15px; text-align: center; color: #666; font-weight: bold; background: #fff;">Showing first 500 of ${data.length} records to ensure maximum browser performance.</div>`;
+        }
+
         tableWrapper.innerHTML = html;
     }
 
-    // Utility to prevent XSS if data contains HTML tags
     function escapeHtml(unsafe) {
+        if (typeof unsafe !== 'string') unsafe = String(unsafe);
         return unsafe
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
