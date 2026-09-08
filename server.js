@@ -328,11 +328,18 @@ app.get('/api/zoho/callback', async (req, res) => {
                     const { access_token, refresh_token, api_domain, expires_in } = parsedData;
 
                     // Log successfully received tokens WITHOUT exposing secrets
-                    console.log(`Successfully received Zoho tokens.`);
+                    console.log(`Successfully received Zoho tokens. API Domain is: ${api_domain}`);
                     
+                    // The API domain returned might be www.zohoapis.com, but Mail API is at mail.zoho.com
+                    let mailHostname = 'mail.zoho.com';
+                    if (accountsServer) {
+                        const tld = accountsServer.split('.').pop(); // e.g., 'com', 'eu', 'in'
+                        mailHostname = `mail.zoho.${tld}`;
+                    }
+
                     // Fetch user account info to save token
                     const accountOptions = {
-                        hostname: api_domain.replace('https://', ''),
+                        hostname: mailHostname,
                         port: 443,
                         path: '/api/accounts',
                         method: 'GET',
@@ -403,12 +410,16 @@ app.get('/api/zoho/callback', async (req, res) => {
                                     });
 
                                     console.log(`Saved tokens for ${emailAddress} to Firebase Database via REST.`);
+                                } else {
+                                    console.error('Account data parsed but missing .data array:', accParsed);
+                                    return res.status(500).send(`Zoho API returned unexpected format: ${JSON.stringify(accParsed)}`);
                                 }
                                 return res.status(200).send('Zoho authorization successful. Tokens securely saved to Firebase.');
                             } catch (e) {
                                 console.error('Error parsing account data or saving to Firebase:', e);
-                                // Sending e.message directly to the browser so we can debug if it happens again!
-                                return res.status(500).send(`Error retrieving account info or saving to DB: ${e.message}`);
+                                console.error('Raw Zoho API Response was:', accData);
+                                // Sending e.message and the raw response directly to the browser so we can debug!
+                                return res.status(500).send(`Error retrieving account info. Zoho said: "${accData}". Error: ${e.message}`);
                             }
                         });
                     });
@@ -536,8 +547,15 @@ app.post('/api/zoho/send-email', async (req, res) => {
             content: content
         });
 
+        // Determine Mail API hostname
+        let mailHostname = 'mail.zoho.com';
+        if (tokenDoc.apiDomain) {
+            const tld = tokenDoc.apiDomain.split('.').pop();
+            mailHostname = `mail.zoho.${tld}`;
+        }
+
         const sendOptions = {
-            hostname: tokenDoc.apiDomain.replace('https://', ''),
+            hostname: mailHostname,
             port: 443,
             path: `/api/accounts/${tokenDoc.accountId}/messages`,
             method: 'POST',
