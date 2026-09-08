@@ -8,6 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardContainer = document.getElementById('dashboard-container');
     const tableWrapper = document.getElementById('table-wrapper');
     const leadCount = document.getElementById('lead-count');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    // Toggle Password Visibility
+    togglePasswordBtn.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            // Eye-off icon
+            eyeIcon.innerHTML = '<path d="m2 2 20 20"/><path d="M6.71 6.71a10 10 0 0 0-4.71 5.29s3 7 10 7a10 10 0 0 0 5.29-1.54"/><path d="M12 15a3 3 0 0 1-3-3"/><path d="M10.7 5.3A10 10 0 0 1 12 5c7 0 10 7 10 7a10.1 10.1 0 0 1-2.3 3.7"/>';
+        } else {
+            passwordInput.type = 'password';
+            // Eye icon
+            eyeIcon.innerHTML = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+        }
+    });
 
     // Handle Login
     loginBtn.addEventListener('click', async () => {

@@ -172,7 +172,12 @@
             <h2>System Login</h2>
             <div id="login-error">Invalid credentials</div>
             <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
+            <div style="position: relative; margin-bottom: 1rem;">
+                <input type="password" id="password" placeholder="Password" style="margin-bottom: 0; padding-right: 2.5rem;">
+                <button type="button" id="toggle-password" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); width: auto; padding: 4px; cursor: pointer;">
+                    <svg id="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
             <button id="login-btn">Secure Login</button>
         </div>
     </div>
