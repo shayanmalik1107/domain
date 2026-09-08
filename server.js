@@ -5,6 +5,8 @@ const whois = require('whois');
 const path = require('path');
 const https = require('https');
 const Groq = require('groq-sdk');
+const xlsx = require('xlsx');
+const fs = require('fs');
 // Removed problematic firebase client SDK, using REST instead.
 
 const getGroqClient = () => {
@@ -592,6 +594,33 @@ app.post('/api/zoho/send-email', async (req, res) => {
     }
 });
 
+// ─── Leads System API ───────────────────────────────────────────────────
+app.post('/api/leads', (req, res) => {
+    const { username, password } = req.body;
+    if (username !== 'shayan malik' || password !== 'Profe$$ional789') {
+        return res.status(401).json({ error: 'Unauthorized: Invalid credentials.' });
+    }
+
+    try {
+        const filePath = path.join(__dirname, 'Drexil LinkedIn Leads - Europe.xlsx');
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ error: 'Leads file not found.' });
+        }
+
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        
+        // Convert the worksheet to a JSON object
+        const leads = xlsx.utils.sheet_to_json(worksheet, { defval: '' });
+        
+        res.status(200).json({ success: true, count: leads.length, data: leads });
+    } catch (error) {
+        console.error('Error parsing leads file:', error);
+        res.status(500).json({ error: 'Failed to parse leads data.' });
+    }
+});
+
 // ─── Static Page Routes ───────────────────────────────────────────────
 app.get(['/about', '/about.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
 app.get(['/contact', '/contact.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
@@ -613,6 +642,7 @@ app.get(['/blog-12', '/blog-12.html'], (req, res) => res.sendFile(path.join(__di
 app.get(['/blog-13', '/blog-13.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-13.html')));
 app.get(['/blog-14', '/blog-14.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-14.html')));
 app.get(['/blog-15', '/blog-15.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'blog-15.html')));
+app.get(['/leads', '/leads.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'leads.html')));
 
 // ─── 404 Fallback Handler ─────────────────────────────────────────────
 app.use((req, res) => {
