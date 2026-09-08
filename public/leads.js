@@ -96,20 +96,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const headers = Array.from(headersSet);
 
-        let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr>';
-        html += '<th class="row-num" style="border: 1px solid #ccc; padding: 8px;">#</th>';
+        let html = '<table><thead><tr>';
+        html += '<th class="row-num">#</th>';
 
         headers.forEach(header => {
-            html += `<th style="border: 1px solid #ccc; padding: 8px; background: #eee;">${escapeHtml(String(header))}</th>`;
+            html += `<th>${escapeHtml(String(header))}</th>`;
         });
         html += '</tr></thead><tbody>';
 
         displayData.forEach((row, index) => {
             html += `<tr>`;
-            html += `<td class="row-num" style="border: 1px solid #ccc; padding: 8px;">${index + 1}</td>`;
+            html += `<td class="row-num">${index + 1}</td>`;
             headers.forEach(header => {
                 const cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
-                html += `<td style="border: 1px solid #ccc; padding: 8px; color: #111;">${escapeHtml(String(cellValue))}</td>`;
+                html += `<td>${escapeHtml(String(cellValue))}</td>`;
             });
             html += `</tr>`;
         });
