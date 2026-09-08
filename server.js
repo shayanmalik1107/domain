@@ -265,6 +265,97 @@ app.post(['/api/generate-names', '/generate-names'], async (req, res) => {
     }
 });
 
+// ─── Zoho OAuth Callback Route ──────────────────────────────────────────
+app.get('/api/zoho/callback', async (req, res) => {
+    const { code, error, 'accounts-server': accountsServer } = req.query;
+
+    if (error) {
+        console.error('Zoho OAuth Error:', error);
+        return res.status(400).send(`Zoho authorization failed. Error: ${error}`);
+    }
+
+    if (!code) {
+        return res.status(200).send('Zoho OAuth callback endpoint is active. Awaiting authorization code.');
+    }
+
+    try {
+        const clientId = process.env.ZOHO_CLIENT_ID;
+        const clientSecret = process.env.ZOHO_CLIENT_SECRET;
+        const redirectUri = process.env.ZOHO_REDIRECT_URI;
+
+        if (!clientId || !clientSecret || !redirectUri) {
+            console.error('Missing Zoho OAuth environment variables.');
+            return res.status(500).send('Server configuration error. Check environment variables.');
+        }
+
+        const tokenBaseUrl = accountsServer || 'https://accounts.zoho.com';
+        const tokenUrl = `${tokenBaseUrl}/oauth/v2/token`;
+        
+        const postData = new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: redirectUri
+        }).toString();
+
+        const tokenUrlObj = new URL(tokenUrl);
+        const options = {
+            hostname: tokenUrlObj.hostname,
+            port: 443,
+            path: tokenUrlObj.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        const tokenReq = https.request(options, (tokenRes) => {
+            let data = '';
+            tokenRes.on('data', (chunk) => data += chunk);
+            tokenRes.on('end', () => {
+                try {
+                    const parsedData = JSON.parse(data);
+                    
+                    if (parsedData.error) {
+                        console.error('Zoho Token Error:', parsedData);
+                        return res.status(400).send(`Zoho token exchange failed. Error: ${parsedData.error}`);
+                    }
+
+                    // Extract tokens
+                    const { access_token, refresh_token, api_domain, expires_in } = parsedData;
+
+                    // Log successfully received tokens WITHOUT exposing secrets
+                    console.log(`Successfully received Zoho tokens.`);
+                    console.log(`Access token length: ${access_token ? access_token.length : 0}`);
+                    console.log(`Refresh token received: ${refresh_token ? 'Yes' : 'No'}`);
+                    console.log(`API Domain: ${api_domain}`);
+                    console.log(`Expires in: ${expires_in} seconds`);
+
+                    // Send safe response to user
+                    return res.status(200).send('Zoho authorization successful. Refresh token received.');
+                } catch (e) {
+                    console.error('Error parsing Zoho token response:', e);
+                    return res.status(500).send('Error parsing token response from Zoho.');
+                }
+            });
+        });
+
+        tokenReq.on('error', (e) => {
+            console.error('HTTPS request error to Zoho:', e);
+            return res.status(500).send('Network error communicating with Zoho.');
+        });
+
+        tokenReq.write(postData);
+        tokenReq.end();
+        
+    } catch (err) {
+        console.error('Unexpected error in Zoho callback:', err);
+        return res.status(500).send('Unexpected error processing Zoho callback.');
+    }
+});
+
 // ─── Static Page Routes ───────────────────────────────────────────────
 app.get(['/about', '/about.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
 app.get(['/contact', '/contact.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'contact.html')));
