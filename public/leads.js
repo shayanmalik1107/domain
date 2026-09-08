@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = Array.from(headersSet);
 
         // Setup DOM for Clusterize
-        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="flex: 1; width: 100%; overflow: auto;"><table><thead><tr>';
+        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="flex: 1; min-height: 0; width: 100%; overflow: auto;"><table><thead><tr>';
         domHtml += '<th class="row-num">#</th>';
 
         headers.forEach(header => {
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         domHtml += '</tr></thead><tbody id="contentArea" class="clusterize-content">';
         domHtml += '</tbody></table></div>';
-
+        
         tableWrapper.innerHTML = domHtml;
 
         // Build array of string rows for the virtual list
@@ -116,12 +116,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return trHtml;
         });
 
-        // Initialize Virtual Scrolling
-        new Clusterize({
-            rows: rowsArray,
-            scrollId: 'scrollArea',
-            contentId: 'contentArea'
-        });
+        // Initialize Virtual Scrolling AFTER a short delay to ensure flexbox height calculation is complete
+        setTimeout(() => {
+            new Clusterize({
+                rows: rowsArray,
+                scrollId: 'scrollArea',
+                contentId: 'contentArea'
+            });
+        }, 100);
     }
 
     function escapeHtml(unsafe) {
