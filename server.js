@@ -4,7 +4,18 @@ const cors = require('cors');
 const whois = require('whois');
 const path = require('path');
 const https = require('https');
+const mongoose = require('mongoose');
 const Groq = require('groq-sdk');
+const ZohoToken = require('./models/ZohoToken');
+
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI)
+        .then(() => console.log('Connected to MongoDB'))
+        .catch(err => console.error('MongoDB connection error:', err));
+} else {
+    console.warn('MONGODB_URI environment variable is missing. Tokens will not be saved.');
+}
 
 const getGroqClient = () => {
     const apiKey = (process.env.GROQ_API_KEY || '').trim();
@@ -328,13 +339,63 @@ app.get('/api/zoho/callback', async (req, res) => {
 
                     // Log successfully received tokens WITHOUT exposing secrets
                     console.log(`Successfully received Zoho tokens.`);
-                    console.log(`Access token length: ${access_token ? access_token.length : 0}`);
-                    console.log(`Refresh token received: ${refresh_token ? 'Yes' : 'No'}`);
-                    console.log(`API Domain: ${api_domain}`);
-                    console.log(`Expires in: ${expires_in} seconds`);
+                    
+                    // Fetch user account info to save token
+                    const accountOptions = {
+                        hostname: api_domain.replace('https://', ''),
+                        port: 443,
+                        path: '/api/accounts',
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Zoho-oauthtoken ${access_token}`
+                        }
+                    };
 
-                    // Send safe response to user
-                    return res.status(200).send('Zoho authorization successful. Refresh token received.');
+                    const accountReq = https.request(accountOptions, (accountRes) => {
+                        let accData = '';
+                        accountRes.on('data', (c) => accData += c);
+                        accountRes.on('end', async () => {
+                            try {
+                                const accParsed = JSON.parse(accData);
+                                if (accParsed.data && accParsed.data.length > 0) {
+                                    const account = accParsed.data[0];
+                                    const emailAddress = account.primaryEmailAddress;
+                                    const accountId = account.accountId;
+
+                                    if (process.env.MONGODB_URI) {
+                                        const expiresAt = new Date(Date.now() + (expires_in * 1000));
+                                        
+                                        // Update or Create the token in DB
+                                        await ZohoToken.findOneAndUpdate(
+                                            { emailAddress },
+                                            {
+                                                emailAddress,
+                                                accountId,
+                                                accessToken: access_token,
+                                                // Only overwrite refresh_token if a new one is provided
+                                                ...(refresh_token && { refreshToken: refresh_token }),
+                                                apiDomain: api_domain,
+                                                expiresAt
+                                            },
+                                            { upsert: true, new: true }
+                                        );
+                                        console.log(`Saved tokens for ${emailAddress} to Database.`);
+                                    }
+                                }
+                                return res.status(200).send('Zoho authorization successful. Tokens securely saved.');
+                            } catch (e) {
+                                console.error('Error parsing account data:', e);
+                                return res.status(500).send('Error retrieving account info.');
+                            }
+                        });
+                    });
+                    
+                    accountReq.on('error', (e) => {
+                        console.error('Error fetching account data:', e);
+                        return res.status(500).send('Failed to fetch account info.');
+                    });
+                    accountReq.end();
+
                 } catch (e) {
                     console.error('Error parsing Zoho token response:', e);
                     return res.status(500).send('Error parsing token response from Zoho.');
@@ -353,6 +414,111 @@ app.get('/api/zoho/callback', async (req, res) => {
     } catch (err) {
         console.error('Unexpected error in Zoho callback:', err);
         return res.status(500).send('Unexpected error processing Zoho callback.');
+    }
+});
+
+// ─── Zoho Email Sending API ─────────────────────────────────────────────
+app.post('/api/zoho/send-email', async (req, res) => {
+    const { fromEmail, to, subject, content } = req.body;
+
+    if (!fromEmail || !to || !subject || !content) {
+        return res.status(400).json({ error: 'Missing required fields: fromEmail, to, subject, content' });
+    }
+
+    try {
+        let tokenDoc = await ZohoToken.findOne({ emailAddress: fromEmail });
+        if (!tokenDoc) {
+            return res.status(404).json({ error: `No tokens found for ${fromEmail}. Please authorize this mailbox first.` });
+        }
+
+        // Check if access token is expired (add 1 min buffer)
+        if (Date.now() > (tokenDoc.expiresAt.getTime() - 60000)) {
+            console.log(`Refreshing token for ${fromEmail}...`);
+            const postData = new URLSearchParams({
+                client_id: process.env.ZOHO_CLIENT_ID,
+                client_secret: process.env.ZOHO_CLIENT_SECRET,
+                grant_type: 'refresh_token',
+                refresh_token: tokenDoc.refreshToken
+            }).toString();
+
+            const tokenUrlObj = new URL(`${tokenDoc.apiDomain}/oauth/v2/token`);
+            // Usually refresh is done at accounts.zoho.com, not mail.zoho.com
+            // We use the same accountsServer approach, but if we don't have it saved, fallback to accounts.zoho.com
+            const tokenBaseUrl = 'https://accounts.zoho.com';
+            const refreshUrlObj = new URL(`${tokenBaseUrl}/oauth/v2/token`);
+
+            const refreshedData = await new Promise((resolve, reject) => {
+                const req = https.request({
+                    hostname: refreshUrlObj.hostname,
+                    port: 443,
+                    path: refreshUrlObj.pathname,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Length': Buffer.byteLength(postData)
+                    }
+                }, (res) => {
+                    let data = '';
+                    res.on('data', chunk => data += chunk);
+                    res.on('end', () => resolve(JSON.parse(data)));
+                });
+                req.on('error', reject);
+                req.write(postData);
+                req.end();
+            });
+
+            if (refreshedData.error) {
+                return res.status(500).json({ error: 'Failed to refresh token', details: refreshedData });
+            }
+
+            tokenDoc.accessToken = refreshedData.access_token;
+            tokenDoc.expiresAt = new Date(Date.now() + (refreshedData.expires_in * 1000));
+            await tokenDoc.save();
+        }
+
+        // Send Email using Zoho Mail API
+        const emailPayload = JSON.stringify({
+            fromAddress: fromEmail,
+            toAddress: to,
+            subject: subject,
+            content: content
+        });
+
+        const sendOptions = {
+            hostname: tokenDoc.apiDomain.replace('https://', ''),
+            port: 443,
+            path: `/api/accounts/${tokenDoc.accountId}/messages`,
+            method: 'POST',
+            headers: {
+                'Authorization': `Zoho-oauthtoken ${tokenDoc.accessToken}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(emailPayload)
+            }
+        };
+
+        const sendResult = await new Promise((resolve, reject) => {
+            const req = https.request(sendOptions, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try { resolve({ statusCode: res.statusCode, data: JSON.parse(data) }); }
+                    catch (e) { resolve({ statusCode: res.statusCode, data }); }
+                });
+            });
+            req.on('error', reject);
+            req.write(emailPayload);
+            req.end();
+        });
+
+        if (sendResult.statusCode === 200) {
+            return res.status(200).json({ success: true, message: 'Email sent successfully', data: sendResult.data });
+        } else {
+            return res.status(sendResult.statusCode).json({ error: 'Failed to send email', details: sendResult.data });
+        }
+
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ error: 'Internal server error' });
     }
 });
 
