@@ -58,8 +58,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loginContainer.style.display = 'none';
             dashboardContainer.style.display = 'flex';
 
-            renderTable(data.data);
-            leadCount.textContent = `(${data.count.toLocaleString()} records)`;
+            allLeads = data.data || [];
+            if (data.headers && data.headers.length > 0) {
+                exactHeaders = data.headers;
+            }
+            updateTabs();
+            renderTable();
 
         } catch (error) {
             showError('Network error. Please try again later.');
@@ -81,49 +85,225 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.style.display = 'block';
     }
 
-    function renderTable(data) {
+    let allLeads = [];
+    let exactHeaders = [];
+    let currentTab = 'not_sent';
+    let isTestMode = false;
+
+    // Handle Test Mode Toggle
+    const testModeToggle = document.getElementById('test-mode-toggle');
+    if (testModeToggle) {
+        testModeToggle.addEventListener('change', (e) => {
+            isTestMode = e.target.checked;
+            updateTabs(); // Update counts
+            renderTable(); // Re-render instantly
+        });
+    }
+
+    // Handle Tab Clicks
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.getAttribute('data-tab');
+            updateActionButtons();
+            renderTable();
+        });
+    });
+
+    const startSenderBtn = document.getElementById('start-sender-btn');
+
+    function updateActionButtons() {
+        if (currentTab === 'not_sent') {
+            startSenderBtn.textContent = 'Start Sender';
+            startSenderBtn.style.display = 'block';
+        } else if (currentTab === 'sent') {
+            startSenderBtn.textContent = 'Send Follow-up 1';
+            startSenderBtn.style.display = 'block';
+        } else if (currentTab === 'fu1') {
+            startSenderBtn.textContent = 'Send Follow-up 2';
+            startSenderBtn.style.display = 'block';
+        } else if (currentTab === 'fu2') {
+            startSenderBtn.textContent = 'Send Follow-up 3';
+            startSenderBtn.style.display = 'block';
+        } else {
+            startSenderBtn.style.display = 'none';
+        }
+    }
+
+    function getFilteredLeads() {
+        return allLeads.filter(lead => {
+            const isCorrectMode = isTestMode ? lead.is_test === true : !lead.is_test;
+            return isCorrectMode;
+        });
+    }
+
+    function updateTabs() {
+        const relevantLeads = getFilteredLeads();
+        const counts = {
+            not_sent: 0,
+            sent: 0,
+            response: 0,
+            fu1: 0,
+            fu2: 0,
+            fu3: 0
+        };
+
+        relevantLeads.forEach(lead => {
+            if (counts[lead.status] !== undefined) {
+                counts[lead.status]++;
+            }
+        });
+
+        // Map titles to keys
+        const titles = {
+            not_sent: 'Not Sent',
+            sent: 'Sent',
+            response: 'Response',
+            fu1: 'Follow Up 1',
+            fu2: 'Follow Up 2',
+            fu3: 'Follow Up 3'
+        };
+
+        tabBtns.forEach(btn => {
+            const tabKey = btn.getAttribute('data-tab');
+            if (counts[tabKey] !== undefined) {
+                btn.textContent = `${titles[tabKey]} (${counts[tabKey].toLocaleString()})`;
+            }
+        });
+
+        leadCount.textContent = `(${relevantLeads.length.toLocaleString()} records total)`;
+    }
+
+    // Handle Action Button
+    if (startSenderBtn) {
+        startSenderBtn.addEventListener('click', async () => {
+            if (!confirm(`Are you sure you want to start the ${isTestMode ? 'TEST ' : ''}background engine for ${currentTab}?`)) return;
+            
+            startSenderBtn.textContent = 'Starting...';
+            startSenderBtn.disabled = true;
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            let endpoint = '/api/leads/send';
+            let payload = { username, password, testMode: isTestMode };
+
+            if (currentTab === 'sent') {
+                endpoint = '/api/leads/followup';
+                payload.targetStatus = 'fu1';
+            } else if (currentTab === 'fu1') {
+                endpoint = '/api/leads/followup';
+                payload.targetStatus = 'fu2';
+            } else if (currentTab === 'fu2') {
+                endpoint = '/api/leads/followup';
+                payload.targetStatus = 'fu3';
+            }
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.error || 'Failed to trigger sender.');
+                }
+            } catch (err) {
+                alert('Network error. Failed to trigger sender.');
+            }
+
+            updateActionButtons();
+            startSenderBtn.disabled = false;
+        });
+    }
+
+    async function fetchLeadsSilently() {
+        if (dashboardContainer.style.display !== 'flex') return;
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        try {
+            const response = await fetch('/api/leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                allLeads = data.data || [];
+                if (data.headers && data.headers.length > 0) {
+                    exactHeaders = data.headers;
+                }
+                updateTabs();
+                renderTable();
+            }
+        } catch (e) {
+            // Ignore polling errors
+        }
+    }
+
+    // Start Real-Time polling every 3 seconds
+    setInterval(fetchLeadsSilently, 3000);
+
+    function renderTable() {
+        const relevantLeads = getFilteredLeads();
+        const data = relevantLeads.filter(lead => lead.status === currentTab);
+
+        
         if (!data || data.length === 0) {
-            tableWrapper.innerHTML = '<div class="loading-state">No records found in the Excel file.</div>';
+            tableWrapper.innerHTML = `<div class="loading-state">No records found for status: ${currentTab.replace('_', ' ')}.</div>`;
             return;
         }
 
-        const headersSet = new Set();
-        data.forEach(row => {
-            Object.keys(row).forEach(key => headersSet.add(key));
-        });
-        const headers = Array.from(headersSet);
+        // If backend provided exact headers, use them. Otherwise fallback to dynamically scanning keys.
+        let headers = [];
+        if (exactHeaders.length > 0) {
+            headers = exactHeaders;
+        } else {
+            const headersSet = new Set();
+            data.forEach(row => {
+                Object.keys(row).forEach(key => {
+                    if (!['id', 'history', 'status', 'is_test', 'mailbox_used', 'last_contacted_at'].includes(key)) {
+                        headersSet.add(key);
+                    }
+                });
+            });
+            headers = Array.from(headersSet);
+        }
 
-        // Setup DOM for Clusterize with absolute calc height
-        let domHtml = '<div id="scrollArea" class="clusterize-scroll" style="height: calc(100vh - 75px); width: 100%; overflow: auto;"><table><thead><tr>';
+        // Setup DOM for native HTML table
+        let domHtml = '<table><thead><tr>';
         domHtml += '<th class="row-num">#</th>';
 
         headers.forEach(header => {
             domHtml += `<th>${escapeHtml(String(header))}</th>`;
         });
-        domHtml += '</tr></thead><tbody id="contentArea" class="clusterize-content">';
-        domHtml += '</tbody></table></div>';
+        domHtml += '</tr></thead><tbody>';
         
-        tableWrapper.innerHTML = domHtml;
+        // LIMIT TO 150 ROWS TO PREVENT BROWSER FREEZING
+        const maxRows = 150;
+        const displayData = data.slice(0, maxRows);
 
-        // Build array of string rows for the virtual list
-        const rowsArray = data.map((row, index) => {
-            let trHtml = `<tr><td class="row-num">${index + 1}</td>`;
+        // Build array of string rows
+        displayData.forEach((row, index) => {
+            domHtml += `<tr><td class="row-num">${index + 1}</td>`;
             headers.forEach(header => {
                 const cellValue = row[header] !== undefined && row[header] !== null ? row[header] : '';
-                trHtml += `<td>${escapeHtml(String(cellValue))}</td>`;
+                domHtml += `<td>${escapeHtml(String(cellValue))}</td>`;
             });
-            trHtml += `</tr>`;
-            return trHtml;
+            domHtml += `</tr>`;
         });
 
-        // Initialize Virtual Scrolling AFTER a short delay to ensure flexbox height calculation is complete
-        setTimeout(() => {
-            new Clusterize({
-                rows: rowsArray,
-                scrollId: 'scrollArea',
-                contentId: 'contentArea'
-            });
-        }, 100);
+        if (data.length > maxRows) {
+            domHtml += `<tr><td colspan="${headers.length + 1}" style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.85rem;">Showing first ${maxRows} rows of ${data.length} to maintain performance...</td></tr>`;
+        }
+
+        domHtml += '</tbody></table>';
+        tableWrapper.innerHTML = domHtml;
     }
 
     function escapeHtml(unsafe) {

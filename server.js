@@ -595,29 +595,64 @@ app.post('/api/zoho/send-email', async (req, res) => {
 });
 
 // ─── Leads System API ───────────────────────────────────────────────────
-app.post('/api/leads', (req, res) => {
-    const { username, password } = req.body;
+app.post('/api/leads', async (req, res) => {
+    const { username, password, testMode } = req.body;
     if (username !== 'shayan malik' || password !== 'Profe$$ional789') {
         return res.status(401).json({ error: 'Unauthorized: Invalid credentials.' });
     }
 
     try {
-        const filePath = path.join(__dirname, 'Drexil LinkedIn Leads - Europe.xlsx');
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ error: 'Leads file not found.' });
+        const snapshot = await require('firebase/database').get(require('firebase/database').ref(require('./firebase').db, 'leads'));
+        const headersSnapshot = await require('firebase/database').get(require('firebase/database').ref(require('./firebase').db, 'metadata/headers'));
+        
+        if (!snapshot.exists()) {
+            return res.status(404).json({ error: 'No leads found in database.' });
         }
 
-        const workbook = xlsx.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
+        const headers = headersSnapshot.exists() ? headersSnapshot.val() : [];
+
+        // Convert the Firebase object map to an array for the frontend
+        const leadsObj = snapshot.val();
+        let leads = Object.values(leadsObj);
         
-        // Convert the worksheet to a JSON object
-        const leads = xlsx.utils.sheet_to_json(worksheet, { defval: '' });
-        
-        res.status(200).json({ success: true, count: leads.length, data: leads });
+        // Return ALL leads so the frontend can filter them instantly
+        res.status(200).json({ success: true, count: leads.length, data: leads, headers: headers });
     } catch (error) {
-        console.error('Error parsing leads file:', error);
-        res.status(500).json({ error: 'Failed to parse leads data.' });
+        console.error('Error fetching leads from Firebase:', error);
+        res.status(500).json({ error: 'Failed to fetch leads data.' });
+    }
+});
+
+app.post('/api/leads/send', async (req, res) => {
+    const { username, password, testMode } = req.body;
+    if (username !== 'shayan malik' || password !== 'Profe$$ional789') {
+        return res.status(401).json({ error: 'Unauthorized: Invalid credentials.' });
+    }
+
+    try {
+        const { startSending } = require('./services/emailService');
+        // Start the background process without blocking the HTTP response
+        startSending(testMode);
+        res.status(200).json({ success: true, message: `Sender engine started in the background (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
+    } catch (error) {
+        console.error('Error triggering sender:', error);
+        res.status(500).json({ error: 'Failed to trigger sender.' });
+    }
+});
+
+app.post('/api/leads/followup', async (req, res) => {
+    const { username, password, targetStatus, testMode } = req.body;
+    if (username !== 'shayan malik' || password !== 'Profe$$ional789') {
+        return res.status(401).json({ error: 'Unauthorized: Invalid credentials.' });
+    }
+
+    try {
+        const { startFollowUp } = require('./services/emailService');
+        startFollowUp(targetStatus, testMode);
+        res.status(200).json({ success: true, message: `Follow-up ${targetStatus} engine started (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
+    } catch (error) {
+        console.error('Error triggering follow up:', error);
+        res.status(500).json({ error: 'Failed to trigger follow up.' });
     }
 });
 
@@ -650,6 +685,17 @@ app.use((req, res) => {
 });
 
 if (require.main === module) {
+    // ─── Background Tasks ───────────────────────────────────────────────────
+    try {
+        const { checkResponses } = require('./services/imapService');
+        // Check responses on startup
+        checkResponses();
+        // Poll IMAP every 30 seconds to detect responses instantly
+        setInterval(checkResponses, 30000);
+    } catch (err) {
+        console.error("Failed to initialize IMAP service:", err);
+    }
+
     const PORT = process.env.PORT || 5050;
     app.listen(PORT, () => {
         console.log(`Domain Checker Server running at http://localhost:${PORT}`);
