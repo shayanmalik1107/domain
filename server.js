@@ -600,49 +600,48 @@ const rootLogoPath = path.join(__dirname, 'techni.png');
 
 app.get('/api/track/open/:leadId', async (req, res) => {
     const { leadId } = req.params;
-    
-    // Serve TechniFuse logo PNG image with standard headers
-    res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
+
+    // 1. Update Firebase first to guarantee open recording on Vercel lambda
+    if (leadId) {
+        try {
+            const { db } = require('./firebase');
+            const { ref, get, update } = require('firebase/database');
+            const dbRef = ref(db, `leads/${leadId}`);
+            const snapshot = await get(dbRef);
+            
+            if (snapshot.exists()) {
+                const lead = snapshot.val();
+                const currentCount = lead.opened_count || 0;
+                const history = lead.history || [];
+
+                await update(dbRef, {
+                    opened: true,
+                    opened_at: lead.opened_at || new Date().toISOString(),
+                    last_opened_at: new Date().toISOString(),
+                    opened_count: currentCount + 1,
+                    history: [...history, {
+                        action: 'opened',
+                        date: new Date().toISOString()
+                    }]
+                });
+                console.log(`Email open recorded for lead ID: ${leadId} (${lead.email || 'unknown email'})`);
+            }
+        } catch (err) {
+            console.error(`Error recording email open for ${leadId}:`, err.message);
+        }
+    }
+
+    // 2. Serve TechniFuse logo PNG image
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
     if (fs.existsSync(publicLogoPath)) {
-        res.sendFile(publicLogoPath);
+        return res.sendFile(publicLogoPath);
     } else if (fs.existsSync(rootLogoPath)) {
-        res.sendFile(rootLogoPath);
+        return res.sendFile(rootLogoPath);
     } else {
-        res.end();
-    }
-
-    if (!leadId) return;
-
-    try {
-        const { db } = require('./firebase');
-        const { ref, get, update } = require('firebase/database');
-        const dbRef = ref(db, `leads/${leadId}`);
-        const snapshot = await get(dbRef);
-        
-        if (snapshot.exists()) {
-            const lead = snapshot.val();
-            const currentCount = lead.opened_count || 0;
-            const history = lead.history || [];
-
-            await update(dbRef, {
-                opened: true,
-                opened_at: lead.opened_at || new Date().toISOString(),
-                last_opened_at: new Date().toISOString(),
-                opened_count: currentCount + 1,
-                history: [...history, {
-                    action: 'opened',
-                    date: new Date().toISOString()
-                }]
-            });
-            console.log(`Email open recorded for lead ID: ${leadId} (${lead.email || 'unknown email'})`);
-        }
-    } catch (err) {
-        console.error(`Error recording email open for ${leadId}:`, err.message);
+        return res.status(200).end();
     }
 });
 
