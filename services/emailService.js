@@ -126,7 +126,7 @@ TechniFuse`;
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;">
 ${text.replace(/\n/g, '<br>')}
 <br><br>
-<img src="${baseUrl}/api/track/open/${id}" alt="TechniFuse Logo" style="max-width: 160px; height: auto; border: 0; display: block;" />
+<img src="${baseUrl}/api/track/open/${id}?v=${Date.now()}" alt="TechniFuse" style="max-width: 160px; height: auto; border: 0; display: block;" />
 </body>
 </html>`;
 
@@ -287,7 +287,7 @@ TechniFuse`;
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;">
 ${text.replace(/\n/g, '<br>')}
 <br><br>
-<img src="${baseUrl}/api/track/open/${id}" alt="TechniFuse Logo" style="max-width: 160px; height: auto; border: 0; display: block;" />
+<img src="${baseUrl}/api/track/open/${id}?v=${Date.now()}" alt="TechniFuse" style="max-width: 160px; height: auto; border: 0; display: block;" />
 </body>
 </html>`;
 
