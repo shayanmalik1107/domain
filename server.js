@@ -600,10 +600,13 @@ const TRACKING_PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAAB
 app.get('/api/track/open/:leadId', async (req, res) => {
     const { leadId } = req.params;
     
-    // Serve transparent 1x1 GIF instantly
+    // Serve transparent pixel with full standard HTTP headers
     res.setHeader('Content-Type', 'image/gif');
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('Content-Length', TRACKING_PIXEL.length);
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0');
     res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(TRACKING_PIXEL);
 
     if (!leadId) return;
