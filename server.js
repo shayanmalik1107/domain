@@ -682,9 +682,8 @@ app.post('/api/leads/send', async (req, res) => {
 
     try {
         const { startSending } = require('./services/emailService');
-        // Start the background process without blocking the HTTP response
-        startSending(testMode);
-        res.status(200).json({ success: true, message: `Sender engine started in the background (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
+        await startSending(testMode);
+        res.status(200).json({ success: true, message: `Sender engine completed (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
     } catch (error) {
         console.error('Error triggering sender:', error);
         res.status(500).json({ error: 'Failed to trigger sender.' });
@@ -699,8 +698,8 @@ app.post('/api/leads/followup', async (req, res) => {
 
     try {
         const { startFollowUp } = require('./services/emailService');
-        startFollowUp(targetStatus, testMode);
-        res.status(200).json({ success: true, message: `Follow-up ${targetStatus} engine started (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
+        await startFollowUp(targetStatus, testMode);
+        res.status(200).json({ success: true, message: `Follow-up ${targetStatus} engine completed (${testMode ? 'TEST MODE' : 'LIVE MODE'}).` });
     } catch (error) {
         console.error('Error triggering follow up:', error);
         res.status(500).json({ error: 'Failed to trigger follow up.' });

@@ -280,6 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                pollSendingProgress(destinationTab);
+                
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -289,13 +291,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (!response.ok) {
+                    if (progressTimer) clearInterval(progressTimer);
+                    progressContainer.style.display = 'none';
                     alert(data.error || 'Failed to trigger sender.');
                     startSenderBtn.disabled = false;
                     updateActionButtons();
                 } else {
-                    pollSendingProgress(destinationTab);
+                    if (progressTimer) clearInterval(progressTimer);
+                    progressBarFill.style.width = '100%';
+                    progressCountText.textContent = '100%';
+                    progressStatusText.textContent = 'Batch complete! Updating dashboard...';
+                    
+                    // Fetch latest leads from DB immediately
+                    await fetchLeadsSilently();
+
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        startSenderBtn.disabled = false;
+                        if (destinationTab) {
+                            switchTab(destinationTab);
+                        } else {
+                            updateActionButtons();
+                        }
+                    }, 1200);
                 }
             } catch (err) {
+                if (progressTimer) clearInterval(progressTimer);
+                progressContainer.style.display = 'none';
                 alert('Network error. Failed to trigger sender.');
                 startSenderBtn.disabled = false;
                 updateActionButtons();
