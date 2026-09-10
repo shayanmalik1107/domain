@@ -120,7 +120,15 @@ Best,
 TechniFuse`;
 
             const baseUrl = process.env.APP_URL || 'https://www.domny.online';
-            const htmlContent = text.replace(/\n/g, '<br>') + `<br><br><img src="${baseUrl}/api/track/open/${id}" width="1" height="1" style="display:none;" alt="" />`;
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;">
+${text.replace(/\n/g, '<br>')}
+<br><br>
+<img src="${baseUrl}/api/track/open/${id}" width="1" height="1" border="0" alt="" />
+</body>
+</html>`;
 
             try {
                 await transporter.sendMail({
@@ -273,7 +281,15 @@ TechniFuse`;
             }
 
             const baseUrl = process.env.APP_URL || 'https://www.domny.online';
-            const htmlContent = text.replace(/\n/g, '<br>') + `<br><br><img src="${baseUrl}/api/track/open/${id}" width="1" height="1" style="display:none;" alt="" />`;
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #222222; line-height: 1.6;">
+${text.replace(/\n/g, '<br>')}
+<br><br>
+<img src="${baseUrl}/api/track/open/${id}" width="1" height="1" border="0" alt="" />
+</body>
+</html>`;
 
             try {
                 await transporter.sendMail({
