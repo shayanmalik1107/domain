@@ -595,7 +595,8 @@ app.post('/api/zoho/send-email', async (req, res) => {
 });
 
 // ─── Email Open Tracking Image Route ──────────────────────────────────
-const techniLogoPath = path.join(__dirname, 'techni.png');
+const publicLogoPath = path.join(__dirname, 'public', 'techni.png');
+const rootLogoPath = path.join(__dirname, 'techni.png');
 
 app.get('/api/track/open/:leadId', async (req, res) => {
     const { leadId } = req.params;
@@ -607,8 +608,10 @@ app.get('/api/track/open/:leadId', async (req, res) => {
     res.setHeader('Expires', '0');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (fs.existsSync(techniLogoPath)) {
-        res.sendFile(techniLogoPath);
+    if (fs.existsSync(publicLogoPath)) {
+        res.sendFile(publicLogoPath);
+    } else if (fs.existsSync(rootLogoPath)) {
+        res.sendFile(rootLogoPath);
     } else {
         res.end();
     }
