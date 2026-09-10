@@ -47,6 +47,13 @@ function getFirstName(fullName) {
 
 async function startSending(testMode = false) {
     try {
+        if (!transporters || transporters.length === 0) {
+            const msg = 'No mailboxes configured on environment. Please check MAILBOX_1..5 and MAILBOX_PASS.';
+            console.error(msg);
+            sendingState = { isSending: false, status: 'error', message: msg };
+            throw new Error(msg);
+        }
+
         const snapshot = await get(ref(db, 'leads'));
         if (!snapshot.exists()) {
             sendingState = { isSending: false, status: 'idle', message: 'No leads in database.' };
@@ -175,6 +182,13 @@ async function startFollowUp(targetStatus, testMode = false) {
     if (!sourceStatus) return;
 
     try {
+        if (!transporters || transporters.length === 0) {
+            const msg = 'No mailboxes configured on environment. Please check MAILBOX_1..5 and MAILBOX_PASS.';
+            console.error(msg);
+            sendingState = { isSending: false, status: 'error', message: msg };
+            throw new Error(msg);
+        }
+
         const snapshot = await get(ref(db, 'leads'));
         if (!snapshot.exists()) {
             sendingState = { isSending: false, status: 'idle', message: 'No leads in database.' };
