@@ -594,6 +594,48 @@ app.post('/api/zoho/send-email', async (req, res) => {
     }
 });
 
+// ─── Email Open Tracking Pixel Route ──────────────────────────────────
+const TRACKING_PIXEL = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+
+app.get('/api/track/open/:leadId', async (req, res) => {
+    const { leadId } = req.params;
+    
+    // Serve transparent 1x1 GIF instantly
+    res.setHeader('Content-Type', 'image/gif');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.end(TRACKING_PIXEL);
+
+    if (!leadId) return;
+
+    try {
+        const { db } = require('./firebase');
+        const { ref, get, update } = require('firebase/database');
+        const dbRef = ref(db, `leads/${leadId}`);
+        const snapshot = await get(dbRef);
+        
+        if (snapshot.exists()) {
+            const lead = snapshot.val();
+            const currentCount = lead.opened_count || 0;
+            const history = lead.history || [];
+
+            await update(dbRef, {
+                opened: true,
+                opened_at: lead.opened_at || new Date().toISOString(),
+                last_opened_at: new Date().toISOString(),
+                opened_count: currentCount + 1,
+                history: [...history, {
+                    action: 'opened',
+                    date: new Date().toISOString()
+                }]
+            });
+            console.log(`Email open recorded for lead ID: ${leadId} (${lead.email || 'unknown email'})`);
+        }
+    } catch (err) {
+        console.error(`Error recording email open for ${leadId}:`, err.message);
+    }
+});
+
 // ─── Leads System API ───────────────────────────────────────────────────
 app.post('/api/leads', async (req, res) => {
     const { username, password, testMode } = req.body;

@@ -144,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const counts = {
             not_sent: 0,
             sent: 0,
+            opened: 0,
             response: 0,
             fu1: 0,
             fu2: 0,
@@ -154,12 +155,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (counts[lead.status] !== undefined) {
                 counts[lead.status]++;
             }
+            if (lead.opened === true) {
+                counts.opened++;
+            }
         });
 
         // Map titles to keys
         const titles = {
             not_sent: 'Not Sent',
             sent: 'Sent',
+            opened: 'Opened',
             response: 'Response',
             fu1: 'Follow Up 1',
             fu2: 'Follow Up 2',
@@ -251,7 +256,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTable() {
         const relevantLeads = getFilteredLeads();
-        const data = relevantLeads.filter(lead => lead.status === currentTab);
+        const data = currentTab === 'opened' 
+            ? relevantLeads.filter(lead => lead.opened === true) 
+            : relevantLeads.filter(lead => lead.status === currentTab);
 
         
         if (!data || data.length === 0) {

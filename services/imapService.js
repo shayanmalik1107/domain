@@ -46,6 +46,11 @@ async function checkResponses() {
         try {
             console.log(`Connecting to IMAP for ${email}...`);
             const connection = await imaps.connect(config);
+            if (connection) {
+                connection.on('error', (err) => {
+                    console.error(`IMAP connection error for ${email}:`, err ? err.message : err);
+                });
+            }
             await connection.openBox('INBOX');
             
             // Search for all messages from yesterday and today
