@@ -299,6 +299,39 @@
             transform: none;
         }
 
+        /* ─── Progress Bar Styles ─── */
+        .progress-card {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-light);
+            padding: 0.75rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: fadeIn 0.3s ease;
+        }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--gradient-accent);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 10px;
+        }
+
         /* ─── Premium Table Styles ─── */
         .table-wrapper {
             flex: 1;
@@ -425,6 +458,17 @@
             </div>
             <div>
                 <button id="start-sender-btn" class="primary-action-btn">Start Sender</button>
+            </div>
+        </div>
+
+        <!-- Sending Progress Card -->
+        <div id="sending-progress-container" class="progress-card" style="display: none;">
+            <div class="progress-info">
+                <span id="progress-status-text">Preparing batch...</span>
+                <span id="progress-count-text">0 / 0</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
             </div>
         </div>
 

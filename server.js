@@ -636,6 +636,15 @@ app.get('/api/track/open/:leadId', async (req, res) => {
     }
 });
 
+app.get('/api/leads/status', (req, res) => {
+    try {
+        const { getSendingStatus } = require('./services/emailService');
+        res.status(200).json(getSendingStatus());
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ─── Leads System API ───────────────────────────────────────────────────
 app.post('/api/leads', async (req, res) => {
     const { username, password, testMode } = req.body;

@@ -181,6 +181,75 @@ document.addEventListener('DOMContentLoaded', () => {
         leadCount.textContent = `(${relevantLeads.length.toLocaleString()} records total)`;
     }
 
+    const progressContainer = document.getElementById('sending-progress-container');
+    const progressStatusText = document.getElementById('progress-status-text');
+    const progressCountText = document.getElementById('progress-count-text');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    let progressTimer = null;
+
+    function switchTab(tabKey) {
+        tabBtns.forEach(b => {
+            if (b.getAttribute('data-tab') === tabKey) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
+        currentTab = tabKey;
+        updateActionButtons();
+        renderTable();
+    }
+
+    function pollSendingProgress(destinationTab) {
+        if (progressTimer) clearInterval(progressTimer);
+        progressContainer.style.display = 'flex';
+        progressBarFill.style.width = '0%';
+        progressStatusText.textContent = 'Starting batch engine...';
+        progressCountText.textContent = '0 / 0';
+        startSenderBtn.disabled = true;
+
+        progressTimer = setInterval(async () => {
+            try {
+                const res = await fetch('/api/leads/status');
+                if (!res.ok) return;
+                const statusData = await res.json();
+
+                if (statusData.isSending) {
+                    const pct = statusData.total > 0 ? Math.round((statusData.current / statusData.total) * 100) : 0;
+                    progressBarFill.style.width = pct + '%';
+                    progressCountText.textContent = `${statusData.current} / ${statusData.total} (${pct}%)`;
+                    progressStatusText.textContent = statusData.message || 'Sending emails...';
+                } else if (statusData.status === 'completed') {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                    progressBarFill.style.width = '100%';
+                    progressCountText.textContent = `${statusData.total} / ${statusData.total} (100%)`;
+                    progressStatusText.textContent = statusData.message || 'Batch complete!';
+
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        startSenderBtn.disabled = false;
+                        updateActionButtons();
+                        if (destinationTab) {
+                            switchTab(destinationTab);
+                        }
+                    }, 1500);
+                } else if (statusData.status === 'error' || statusData.status === 'idle') {
+                    clearInterval(progressTimer);
+                    progressTimer = null;
+                    if (statusData.status === 'error') {
+                        alert(`Sending error: ${statusData.message}`);
+                    }
+                    progressContainer.style.display = 'none';
+                    startSenderBtn.disabled = false;
+                    updateActionButtons();
+                }
+            } catch (e) {
+                // Ignore polling errors
+            }
+        }, 1000);
+    }
+
     // Handle Action Button
     if (startSenderBtn) {
         startSenderBtn.addEventListener('click', async () => {
@@ -194,16 +263,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let endpoint = '/api/leads/send';
             let payload = { username, password, testMode: isTestMode };
+            let destinationTab = 'sent';
 
             if (currentTab === 'sent') {
                 endpoint = '/api/leads/followup';
                 payload.targetStatus = 'fu1';
+                destinationTab = 'fu1';
             } else if (currentTab === 'fu1') {
                 endpoint = '/api/leads/followup';
                 payload.targetStatus = 'fu2';
+                destinationTab = 'fu2';
             } else if (currentTab === 'fu2') {
                 endpoint = '/api/leads/followup';
                 payload.targetStatus = 'fu3';
+                destinationTab = 'fu3';
             }
 
             try {
@@ -217,13 +290,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     alert(data.error || 'Failed to trigger sender.');
+                    startSenderBtn.disabled = false;
+                    updateActionButtons();
+                } else {
+                    pollSendingProgress(destinationTab);
                 }
             } catch (err) {
                 alert('Network error. Failed to trigger sender.');
+                startSenderBtn.disabled = false;
+                updateActionButtons();
             }
-
-            updateActionButtons();
-            startSenderBtn.disabled = false;
         });
     }
 

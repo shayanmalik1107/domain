@@ -23,6 +23,23 @@ const transporters = mailboxes.map(email => nodemailer.createTransport({
     }
 }));
 
+let sendingState = {
+    isSending: false,
+    status: 'idle',
+    actionType: '',
+    targetStatus: '',
+    testMode: false,
+    total: 0,
+    current: 0,
+    currentLeadEmail: '',
+    currentMailbox: '',
+    message: ''
+};
+
+function getSendingStatus() {
+    return sendingState;
+}
+
 function getFirstName(fullName) {
     if (!fullName) return 'there';
     return fullName.split(' ')[0];
@@ -31,12 +48,14 @@ function getFirstName(fullName) {
 async function startSending(testMode = false) {
     try {
         const snapshot = await get(ref(db, 'leads'));
-        if (!snapshot.exists()) return;
+        if (!snapshot.exists()) {
+            sendingState = { isSending: false, status: 'idle', message: 'No leads in database.' };
+            return;
+        }
 
         const leadsObj = snapshot.val();
         
         // Find leads that are not_sent
-        // Limit to 20 emails per mailbox (e.g., 20 * 5 = 100 total for 5 mailboxes)
         const maxLimit = 20 * (transporters.length || 1);
         const notSentLeads = Object.entries(leadsObj)
             .filter(([id, lead]) => {
@@ -47,12 +66,24 @@ async function startSending(testMode = false) {
 
         if (notSentLeads.length === 0) {
             console.log("No leads to send to.");
+            sendingState = { isSending: false, status: 'idle', message: 'No leads to send to.' };
             return;
         }
 
         console.log(`Starting to send emails to ${notSentLeads.length} leads...`);
+        sendingState = {
+            isSending: true,
+            status: 'sending',
+            actionType: 'initial',
+            targetStatus: 'sent',
+            testMode,
+            total: notSentLeads.length,
+            current: 0,
+            currentLeadEmail: '',
+            currentMailbox: '',
+            message: `Starting to send emails to ${notSentLeads.length} leads...`
+        };
 
-        // We want to loop and send. Wait a few seconds between sends to avoid rate limits
         for (let i = 0; i < notSentLeads.length; i++) {
             const [id, lead] = notSentLeads[i];
             const mailboxIndex = i % transporters.length;
@@ -61,6 +92,11 @@ async function startSending(testMode = false) {
 
             const brand = lead.company || 'your company';
             const firstName = getFirstName(lead.full_name);
+
+            sendingState.current = i + 1;
+            sendingState.currentLeadEmail = lead.email;
+            sendingState.currentMailbox = senderEmail;
+            sendingState.message = `Sending email (${i + 1}/${notSentLeads.length}) to ${lead.email}...`;
 
             const subject = `Quick question about ${brand}'s app`;
             const text = `Hi ${firstName},
@@ -105,22 +141,31 @@ TechniFuse`;
                 console.error(`Failed to send to ${lead.email} using ${senderEmail}:`, err.message);
             }
 
-            // Dynamic Delay Logic: First loop (first 5 emails) = 2s, second loop = 5s, alternating
+            // Dynamic Delay Logic
             const loopNumber = Math.floor(i / transporters.length);
             const waitTime = (loopNumber % 2 === 0) ? 2000 : 5000;
             await new Promise(r => setTimeout(r, waitTime));
         }
 
         console.log("Sending batch complete.");
+        sendingState = {
+            isSending: false,
+            status: 'completed',
+            actionType: 'initial',
+            targetStatus: 'sent',
+            testMode,
+            total: notSentLeads.length,
+            current: notSentLeads.length,
+            message: `Batch complete. Successfully sent ${notSentLeads.length} emails.`
+        };
 
     } catch (err) {
         console.error("Error in startSending:", err);
+        sendingState = { isSending: false, status: 'error', message: err.message };
     }
 }
 
 async function startFollowUp(targetStatus, testMode = false) {
-    // targetStatus is what we are sending TO (e.g. fu1, fu2, fu3)
-    // sourceStatus is where they are coming FROM (e.g. sent -> fu1)
     const sourceMap = {
         'fu1': 'sent',
         'fu2': 'fu1',
@@ -131,12 +176,14 @@ async function startFollowUp(targetStatus, testMode = false) {
 
     try {
         const snapshot = await get(ref(db, 'leads'));
-        if (!snapshot.exists()) return;
+        if (!snapshot.exists()) {
+            sendingState = { isSending: false, status: 'idle', message: 'No leads in database.' };
+            return;
+        }
 
         const leadsObj = snapshot.val();
         
         // Find leads in the sourceStatus
-        // Limit to 20 emails per mailbox (e.g., 20 * 5 = 100 total for 5 mailboxes)
         const maxLimit = 20 * (transporters.length || 1);
         const sourceLeads = Object.entries(leadsObj)
             .filter(([id, lead]) => {
@@ -147,18 +194,28 @@ async function startFollowUp(targetStatus, testMode = false) {
 
         if (sourceLeads.length === 0) {
             console.log(`No leads in ${sourceStatus} to follow up with.`);
+            sendingState = { isSending: false, status: 'idle', message: `No leads in ${sourceStatus} to follow up with.` };
             return;
         }
 
         console.log(`Starting to send ${targetStatus} to ${sourceLeads.length} leads...`);
+        sendingState = {
+            isSending: true,
+            status: 'sending',
+            actionType: targetStatus,
+            targetStatus: targetStatus,
+            testMode,
+            total: sourceLeads.length,
+            current: 0,
+            currentLeadEmail: '',
+            currentMailbox: '',
+            message: `Starting to send ${targetStatus} to ${sourceLeads.length} leads...`
+        };
 
         for (let i = 0; i < sourceLeads.length; i++) {
             const [id, lead] = sourceLeads[i];
             
-            // Re-use the exact same mailbox that originally sent to them!
-            // If we don't have it, default to mailbox 1
             const mailboxUsedIndex = (lead.mailbox_used ? lead.mailbox_used - 1 : 0);
-            // Ensure index is valid
             const safeIndex = (mailboxUsedIndex >= 0 && mailboxUsedIndex < transporters.length) ? mailboxUsedIndex : 0;
             
             const transporter = transporters[safeIndex];
@@ -166,6 +223,11 @@ async function startFollowUp(targetStatus, testMode = false) {
 
             const firstName = getFirstName(lead.full_name);
             const brand = lead.company || 'your company';
+
+            sendingState.current = i + 1;
+            sendingState.currentLeadEmail = lead.email;
+            sendingState.currentMailbox = senderEmail;
+            sendingState.message = `Sending ${targetStatus} (${i + 1}/${sourceLeads.length}) to ${lead.email}...`;
 
             let subject = '';
             let text = '';
@@ -210,7 +272,7 @@ TechniFuse`;
 
                 // Update Firebase
                 await update(ref(db, `leads/${id}`), {
-                    status: targetStatus, // move them to fu1, fu2, etc.
+                    status: targetStatus,
                     last_contacted_at: new Date().toISOString(),
                     history: [...(lead.history || []), {
                         action: `sent_${targetStatus}`,
@@ -231,10 +293,21 @@ TechniFuse`;
         }
 
         console.log(`Follow-up ${targetStatus} batch complete.`);
+        sendingState = {
+            isSending: false,
+            status: 'completed',
+            actionType: targetStatus,
+            targetStatus: targetStatus,
+            testMode,
+            total: sourceLeads.length,
+            current: sourceLeads.length,
+            message: `Follow-up ${targetStatus} batch complete. Processed ${sourceLeads.length} emails.`
+        };
 
     } catch (err) {
         console.error("Error in startFollowUp:", err);
+        sendingState = { isSending: false, status: 'error', message: err.message };
     }
 }
 
-module.exports = { startSending, startFollowUp };
+module.exports = { startSending, startFollowUp, getSendingStatus };
