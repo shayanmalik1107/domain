@@ -632,6 +632,7 @@ app.get('/api/track/open/:leadId', async (req, res) => {
     }
 
     // 2. Serve TechniFuse logo PNG image
+    res.setHeader('Content-Type', 'image/png');
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Access-Control-Allow-Origin', '*');
