@@ -203,51 +203,38 @@ document.addEventListener('DOMContentLoaded', () => {
     function pollSendingProgress(destinationTab) {
         if (progressTimer) clearInterval(progressTimer);
         progressContainer.style.display = 'flex';
-        progressBarFill.style.width = '0%';
-        progressStatusText.textContent = 'Starting batch engine...';
-        progressCountText.textContent = '0 / 0';
+        progressBarFill.style.width = '5%';
+        progressStatusText.textContent = 'Connecting to SMTP mailboxes...';
+        progressCountText.textContent = '0%';
         startSenderBtn.disabled = true;
+
+        const initialSourceLeads = getFilteredLeads().filter(l => l.status === currentTab);
+        const totalBatch = initialSourceLeads.length || 1;
 
         progressTimer = setInterval(async () => {
             try {
-                const res = await fetch('/api/leads/status');
-                if (!res.ok) return;
-                const statusData = await res.json();
-
-                if (statusData.isSending) {
-                    const pct = statusData.total > 0 ? Math.round((statusData.current / statusData.total) * 100) : 0;
-                    progressBarFill.style.width = pct + '%';
-                    progressCountText.textContent = `${statusData.current} / ${statusData.total} (${pct}%)`;
-                    progressStatusText.textContent = statusData.message || 'Sending emails...';
-                } else if (statusData.status === 'completed') {
-                    clearInterval(progressTimer);
-                    progressTimer = null;
-                    progressBarFill.style.width = '100%';
-                    progressCountText.textContent = `${statusData.total} / ${statusData.total} (100%)`;
-                    progressStatusText.textContent = statusData.message || 'Batch complete!';
-
-                    setTimeout(() => {
-                        progressContainer.style.display = 'none';
-                        startSenderBtn.disabled = false;
-                        updateActionButtons();
-                        if (destinationTab) {
-                            switchTab(destinationTab);
-                        }
-                    }, 1500);
-                } else if (statusData.status === 'error' || statusData.status === 'idle') {
-                    clearInterval(progressTimer);
-                    progressTimer = null;
-                    if (statusData.status === 'error') {
-                        alert(`Sending error: ${statusData.message}`);
+                await fetchLeadsSilently();
+                
+                const relevantLeads = getFilteredLeads();
+                let movedCount = 0;
+                initialSourceLeads.forEach(initLead => {
+                    const updated = relevantLeads.find(l => l.id === initLead.id);
+                    if (updated && updated.status !== currentTab) {
+                        movedCount++;
                     }
-                    progressContainer.style.display = 'none';
-                    startSenderBtn.disabled = false;
-                    updateActionButtons();
-                }
+                });
+
+                const pct = Math.min(100, Math.round((movedCount / totalBatch) * 100));
+                progressBarFill.style.width = Math.max(5, pct) + '%';
+                progressCountText.textContent = `${movedCount} / ${totalBatch} (${pct}%)`;
+                progressStatusText.textContent = movedCount > 0 
+                    ? `Sending batch... (${movedCount} of ${totalBatch} processed)`
+                    : 'Connecting to SMTP mailboxes...';
+
             } catch (e) {
                 // Ignore polling errors
             }
-        }, 1000);
+        }, 1200);
     }
 
     // Handle Action Button
