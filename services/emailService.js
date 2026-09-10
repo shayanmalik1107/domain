@@ -76,7 +76,7 @@ Worth a quick reply if you'd like to see what that could look like for ${brand}?
 Best,
 TechniFuse`;
 
-            const baseUrl = process.env.APP_URL || 'http://localhost:5050';
+            const baseUrl = process.env.APP_URL || 'https://donmy.online';
             const htmlContent = text.replace(/\n/g, '<br>') + `<br><br><img src="${baseUrl}/api/track/open/${id}" width="1" height="1" style="display:none;" alt="" />`;
 
             try {
@@ -196,7 +196,7 @@ All the best,
 TechniFuse`;
             }
 
-            const baseUrl = process.env.APP_URL || 'http://localhost:5050';
+            const baseUrl = process.env.APP_URL || 'https://donmy.online';
             const htmlContent = text.replace(/\n/g, '<br>') + `<br><br><img src="${baseUrl}/api/track/open/${id}" width="1" height="1" style="display:none;" alt="" />`;
 
             try {
